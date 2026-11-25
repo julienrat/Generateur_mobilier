@@ -9,10 +9,12 @@ let sd = +(process.env.SEED || 1); const rnd = () => (sd = (sd * 16807) % 214748
 const R_ = (a, b, s) => Math.round((a + rnd() * (b - a)) / (s || 1)) * (s || 1), pick = a => a[Math.floor(rnd() * a.length)];
 const cases = [];
 for (let i = 0; i < +(process.env.N || 60); i++) {
-  const k = i % 4;
-  if (k === 0) cases.push(['table', { L: R_(600, 3000, 10), P: R_(280, 1400, 10), H: R_(350, 1150, 5), forme: pick(['rect', 'arrondi', 'stade']), R: R_(5, 300, 5), pied: pick(['A', 'plaque']), wt: R_(160, 1200, 10), ov: R_(30, 600, 5), trav: pick(['cle', 'vis', 'aucune']), ytr: R_(60, 600, 5), rail: rnd() > 0.4, fix: pick(['borgne', 'traversant']), cable: rnd() > 0.5 }]);
+  const k = i % 6;
+  if (k === 0) cases.push(['table', { L: R_(600, 3000, 10), P: R_(280, 1400, 10), H: R_(350, 1150, 5), forme: pick(['rect', 'arrondi', 'stade']), R: R_(5, 300, 5), pied: pick(['A', 'plaque']), wt: R_(160, 1200, 10), ov: R_(30, 600, 5), trav: pick(['cle', 'vis', 'aucune']), ytr: R_(60, 600, 5), rail: rnd() > 0.4, fix: pick(['borgne', 'traversant']), cable: rnd() > 0.5, nP: rnd() > 0.6 ? 3 : 2 }]);
   if (k === 1) cases.push(['gueridon', { D: R_(350, 1000, 5), forme: pick(['rond', 'carre']), H: R_(400, 1150, 5), B: R_(300, 900, 5), fix: pick(['borgne', 'traversant']) }]);
-  if (k === 2) cases.push(['casier', { W: R_(300, 2000, 10), H: R_(300, 2200, 10), D: R_(200, 600, 10), nx: R_(1, 8), ny: R_(1, 8), hp: R_(0, 200, 5), back: rnd() > 0.3, portes: pick(['aucune', 'bas', 'toutes']), handle: pick(['decoupe', 'percage', 'aucune']), gapF: 3 }]);
+  if (k === 2) cases.push(['casier', { W: R_(300, 2000, 10), H: R_(300, 2200, 10), D: R_(200, 600, 10), nx: R_(1, 8), ny: R_(1, 8), hp: R_(0, 200, 5), back: rnd() > 0.3, portes: pick(['aucune', 'bas', 'toutes']), handle: pick(['decoupe', 'percage', 'aucune']), gapF: 3, jard: rnd() > 0.6, hj: R_(120, 400, 10) }]);
+  if (k === 4) cases.push(['stand', { L: R_(900, 2400, 10), P: R_(600, 1000, 10), h1: R_(680, 780, 5), h2: R_(860, 960, 5), h3: R_(1040, 1180, 5), niv: R_(1, 3), ytr: R_(80, 300, 5) }]);
+  if (k === 5) cases.push(['cloison', { W: R_(600, 2000, 10), H: R_(900, 2100, 10), D: R_(350, 800, 10), roul: rnd() > 0.5, poig: rnd() > 0.5 }]);
   if (k === 3) cases.push(['chaise', { Hs: R_(380, 800, 5), W: R_(360, 600, 5), D: R_(380, 620, 5), Hb: R_(650, 1150, 5), inc: R_(0, 18), nl: R_(1, 5), trav: rnd() > 0.3, yst: R_(100, 500, 5) }]);
 }
 const dens = raw => C.arcPts(raw.map(q => ({ x: q[0], y: q[1], b: q[2] || 0 })));

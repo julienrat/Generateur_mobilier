@@ -10,6 +10,11 @@ Les entrées décrivent les changements du point de vue de l'utilisateur. Chaque
 - Les tests renvoient un code d'erreur en cas d'échec (pour la CI).
 - 3D et vignettes : éclairage adouci, les dessus (plateaux, assises) ne sortent plus blancs.
 - Textes d'aide valables quelle que soit la mise en page (réglages à gauche sur grand écran, sous la 3D sur petit écran) ; l'aide « cliquer un caisson » ne s'affiche que pour l'établi modulaire.
+- Choix de couleurs retiré : le bois garde sa teinte naturelle. Scène 3D sur fond gris chaud (au lieu du bleu), bandeau anthracite, boutons de la scène sobres.
+- Nouveaux modèles inspirés d'Opendesk : bureau debout réglable (assis, haut, debout, longerons à clés), cloison mobile (sur roulettes ou patins).
+- Table : 2 ou 3 piètements, longueur jusqu'à 4,8 m ; au-delà d'un panneau, plateau en deux parties réunies par des clés de jonction. Nouvelles versions : plan de travail 4 places, grande table de réunion 4,4 m.
+- Étagère à casiers : option jardinière sur le dessus ; nouvelles versions casiers jardinière et bout de canapé. Nouvelles versions table et tabouret d'enfant, paravent, tableau mobile.
+- Catalogue : 38 fiches, famille « Rangement et cloisons ».
 
 ## v11 (24/11/2026)
 

@@ -8,11 +8,11 @@ Application web d'une seule page qui génère des meubles paramétriques en cont
 
 | Fichier | Rôle | Style |
 |---|---|---|
-| `index.html` | Structure de la page, charge Three.js r128 (cdnjs), puis `js/core.js` et `js/ui.js` | HTML |
+| `index.html` | Structure de la page, charge Three.js r128 (cdnjs), puis `css/app.css`, `js/core.js` et `js/ui.js` suffixés par `?v=` + date de publication (`document.lastModified`) pour éviter les mélanges de versions en cache ; affiche « rechargez la page » si `ui.js` n'a pas posé `window.APP_OK` | HTML |
 | `css/app.css` | Styles, thème clair et sombre (`light-dark()`, variables CSS) | CSS |
 | `js/core.js` | Moteur : pièces, assemblages, dégagements d'angle, imbrication, DXF, ZIP. Aucun accès au DOM. Exporté pour Node en fin de fichier | **ES5** : `var`, `function`, pas de flèches ni de `const` (le fichier est aussi exécuté tel quel par les tests Node) |
 | `js/ui.js` | Interface, état, 3D, catalogue, Mes chutes, exports. Tout le fichier est dans un bloc `{ … }` | ES2020 : `const`, flèches, gabarits |
-| `tests/test.js` | 50 configurations de référence : collisions 3D, mortaises dans la matière, contours valides | Node ≥ 18 |
+| `tests/test.js` | 61 configurations de référence : collisions 3D, mortaises dans la matière, contours valides | Node ≥ 18 |
 | `tests/fuzz.js` | Mêmes contrôles sur des réglages tirés au hasard (`SEED`, `N`) | |
 | `tests/audit.js` | Audit des angles rentrants (dogbones) | |
 | `tools/bundle.js` | Version en un seul fichier dans `dist/` (ignoré par git) | |
@@ -43,7 +43,7 @@ Les tests renvoient un code de sortie non nul en cas d'échec (utilisé par la C
 - Usinages : `rects` (mortaises traversantes, dégagées automatiquement), `pockets` (`{x, y, w, h, depth, side}`, side = ±1 selon la face), `circ` (`{x, y, d, lay: 'T' | 'P' | 'I', depth}` : perçage traversant, poche, découpe intérieure), `curves` (découpes intérieures libres, **non** dégagées automatiquement : appeler `dogbone(points, rayon, true, S.dogStyle)` si une pièce s'y emboîte).
 - 3D : `role` (couleur : `caisse`, `plateau`, `facade`…), `ex` (vue éclatée), `anim` (portes, tiroirs), `rx: { a, y, z }` (pièce inclinée autour d'un axe parallèle à X, ex. lattes de chaise).
 
-**Assemblages** : `tabIv`, `tabsGaps`, `fingers` + `widen` (queues droites avec jeu), `slotU` / `slotV` (mortaise correspondant à un tenon), `addMort` (traversante ou borgne selon `S.blind`), `tenL(épaisseur reçue)` (longueur de tenon cohérente), `topMort` / `topTen` (mortaises forcées borgnes sous un plateau ou une assise), `keyLen` / `keyHole` / `addKey` (tenon traversant bloqué par une clé en coin, démontable), `splitRects` (répartir les usinages d'un plateau coupé en deux), `rrCorners` (rectangle à rayons différents par angle). **Toujours** créer un tenon et sa mortaise avec les mêmes intervalles (`shift` pour changer de repère).
+**Assemblages** : `tabIv`, `tabsGaps`, `fingers` + `widen` (queues droites avec jeu), `slotU` / `slotV` (mortaise correspondant à un tenon), `addMort` (traversante ou borgne selon `S.blind`), `tenL(épaisseur reçue)` (longueur de tenon cohérente), `topMort` / `topTen` (mortaises forcées borgnes sous un plateau ou une assise), `keyLen` / `keyHole` / `addKey` (tenon traversant bloqué par une clé en coin, démontable), `splitRects` (répartir les usinages d'un plateau coupé en deux), `rrCorners` (rectangle à rayons différents par angle), `pivot` / `pivotDoor` / `pivotHoles` / `doorStop` (porte encastrée sur pivots en bois, logements dans les panneaux haut et bas, butée). **Toujours** créer un tenon et sa mortaise avec les mêmes intervalles (`shift` pour changer de repère).
 
 **Dégagements d'angle** (`dogbone`) : appliqués aux mortaises, aux poches et aux angles rentrants **droits** du contour extérieur. Si le rond ne tient pas (arête courte), repli en T le long de l'arête longue. Les angles non droits (formes décoratives) restent nets : si une pièce vient s'y appuyer, laisser un écart d'au moins le rayon de fraise.
 
@@ -54,7 +54,7 @@ Les tests renvoient un code de sortie non nul en cas d'échec (utilisé par la C
 ## Interface (`js/ui.js`)
 
 - **`MODS`** : un modèle = `{ n, tab, g, P: [champs], d: {valeurs par défaut}, pre: [[nom, réglages], …] }`. Champs : `PL(clé, libellé, min, max, pas, unité, condition?)`, choix `{ k, l, o: [[valeur, libellé]] }`, case `{ k, l, c: 1 }`, section repliable `{ sec, open?, sum: p => résumé }`, condition d'affichage `if: p => …`.
-- **`ICO`** (icône SVG 28 × 28 en trait), **`STEPS`** (étapes de montage : tableau, ou fonction des réglages qui renvoie un tableau), **`CAT`** (fiches du catalogue : catégorie, modèle, n° de version prête à l'emploi, nom, description), **`IDEA`** (dimensions que « Mes chutes » peut faire varier).
+- **`ICO`** (icône SVG 28 × 28 en trait), **`STEPS`** (étapes de montage : tableau, ou fonction `(réglages, info du moteur)` qui renvoie un tableau), **`CAT`** (fiches du catalogue : catégorie, modèle, n° de version prête à l'emploi, nom, description), **`IDEA`** (dimensions que « Mes chutes » peut faire varier).
 - État : objet `st`, sauvegardé dans `localStorage` sous la clé `meubles-cnc-v4`. Si son format change de façon incompatible, changer la clé.
 - Pages : `showPage('home' | 'conf' | 'idees')`. `regen()` régénère le meuble, la 3D, le débit et les pièces.
 - 3D : `partGeo` (extrusion, poches creusées, rotation `rx`), `build3d`, vignettes du catalogue (`galR`, `galDraw` : un seul moteur WebGL partagé).

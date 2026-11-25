@@ -9,7 +9,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/app.css">
+<!-- styles et scripts suffixés par la date de publication de la page : après chaque mise en ligne, le navigateur
+     recharge des fichiers neufs au lieu de mélanger une page neuve et des scripts restés en cache -->
+<script>window.APP_V = Date.parse(document.lastModified) || Date.now(); document.write('<link rel="stylesheet" href="css/app.css?v=' + APP_V + '">');</script>
+<noscript><link rel="stylesheet" href="css/app.css"></noscript>
 </head>
 <body>
 <header class="top">
@@ -132,7 +135,17 @@
 <div class="modal" id="modal" hidden><div role="dialog" aria-modal="true" aria-labelledby="mT"><h3 id="mT">DXF du débit complet</h3><p class="help" style="margin:0">La copie automatique est bloquée ici : sélectionnez le texte, copiez-le et enregistrez-le dans un fichier .dxf.</p><textarea id="mTxt" readonly></textarea><button class="btn" id="mClose" type="button">Fermer</button></div></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="js/core.js"></script>
-<script src="js/ui.js"></script>
+<script>
+/* si l'application n'a pas démarré (par exemple un script resté en cache d'une version précédente), le dire au lieu
+   d'afficher une page vide */
+window.addEventListener('load', function () { setTimeout(function () {
+  if (window.APP_OK || document.getElementById('appErr')) return;
+  var d = document.createElement('div'); d.id = 'appErr'; d.setAttribute('role', 'alert');
+  d.style.cssText = 'position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:99;max-width:min(560px,92vw);padding:14px 18px;border-radius:10px;background:#212329;color:#fff;font:500 15px/1.45 system-ui,sans-serif;box-shadow:0 8px 30px rgba(0,0,0,.35)';
+  d.textContent = 'La page n’a pas pu s’afficher entièrement. Rechargez-la en forçant : Ctrl + Maj + R (Cmd + Maj + R sur Mac).';
+  document.body.appendChild(d);
+}, 800); });
+document.write('<script src="js/core.js?v=' + APP_V + '"><\/script><script src="js/ui.js?v=' + APP_V + '"><\/script>');
+</script>
 </body>
 </html>

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Meubles CNC paramétriques</title>
+<meta name="description" content="Générateur de meubles paramétriques en contreplaqué : tables, chaises, rangements et mobilier d’atelier, aperçu 3D et DXF prêts à usiner sur CNC.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect x='4' y='10' width='40' height='30' rx='3' fill='%23e6c890'/%3E%3Cpath d='M4 16h40M4 22h40M4 28h40M4 34h40' stroke='%23c9a265' stroke-width='1.5'/%3E%3Crect x='18' y='4' width='12' height='16' rx='2' fill='%23fff' stroke='%23c9a265'/%3E%3Cpath d='M24 20v10' stroke='%23f2540f' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <svg width="48" height="48" viewBox="0 0 48 48" aria-hidden="true"><rect x="4" y="10" width="40" height="30" rx="3" fill="#e6c890"/><path d="M4 16h40M4 22h40M4 28h40M4 34h40" stroke="#c9a265" stroke-width="1.5"/><rect x="18" y="4" width="12" height="16" rx="2" fill="#fff"/><path d="M24 20v10" stroke="#f2540f" stroke-width="4" stroke-linecap="round"/></svg>
+    <div><h1>Meubles CNC paramétriques</h1><p>Tables, chaises, rangements et mobilier d’atelier en contreplaqué : réglez-les, vérifiez-les en 3D, téléchargez des DXF prêts à usiner.</p></div>
+  </div>
+  <nav class="mods" role="tablist" aria-label="Type de meuble" id="mods"></nav>
+</header>
+<section class="home" id="home" aria-labelledby="hT">
+  <div class="hhead">
+    <div>
+      <h2 id="hT">Choisissez un meuble</h2>
+      <p>Chaque modèle se règle en dimensions, s’assemble par tenons, mi-bois et clés, et se télécharge en DXF prêts à usiner.</p>
+    </div>
+    <div class="hact">
+      <button class="hres" id="hResume" type="button" hidden></button>
+      <button class="hres alt" id="hIdeas" type="button"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 21h15v4H3zM5 16h12v5M8 11h7v5"/><path d="M22 4v4M18.5 6.5l2 2M25.5 6.5l-2 2M20 11h4"/><circle cx="22" cy="10" r="1.2"/></svg><span>Des chutes ? <b>Voir ce qu’elles permettent</b></span></button>
+    </div>
+  </div>
+  <div class="hfil" id="hFil" role="toolbar" aria-label="Filtrer le catalogue"></div>
+  <div id="hCats"></div>
+  <p class="hnote">Vignettes : modèles aux réglages par défaut, cliquez pour les configurer. Typologies de mobilier de bureau et de maison inspirées des catalogues de mobilier à fabrication locale (Opendesk, aribabox) ; dessins, assemblages et cotes propres à cet outil. Code source : <a href="https://github.com/julienrat/Generateur_mobilier">github.com/julienrat/Generateur_mobilier</a>.</p>
+</section>
+<main class="app" hidden>
+  <aside class="ctl" id="ctl" aria-label="Réglages">
+    <button class="crumb" id="toHome" type="button"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>Catalogue</button>
+    <h2 id="cTitle">Caisson à tiroirs</h2>
+    <div class="row"><select id="preset" aria-label="Modèles prêts à l’emploi"></select><button class="qbtn" id="reset" type="button" aria-label="Réinitialiser ce meuble" title="Réinitialiser ce meuble"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M4 4v5h5"/></svg></button><button class="qbtn" id="bGuide" type="button" aria-controls="guide" aria-expanded="false" aria-label="Guide de prise en main" title="Guide de prise en main">?</button></div>
+    <div class="guide" id="guide" hidden>
+      <b>Prise en main</b>
+      <ol>
+        <li>Choisissez un meuble dans le catalogue, ou partez de vos plaques avec « Mes chutes ».</li>
+        <li>Réglez-le ici, section par section : la 3D, le débit et les pièces suivent.</li>
+        <li>Téléchargez le pack DXF dans la fiche de droite.</li>
+      </ol>
+      <button class="btn" id="gOk" type="button">Compris</button>
+    </div>
+    <p class="ulab">Meuble</p>
+    <div id="fMod"></div>
+    <p class="ulab">Usinage et panneau</p>
+    <div id="fUs"></div>
+  </aside>
+  <section class="stage" aria-label="Aperçu">
+    <div class="stbar">
+      <div class="stl">
+      <button class="pbtn" id="tCtl" type="button" aria-expanded="true" aria-controls="ctl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16M15 10l-2 2 2 2"/></svg></button>
+      <div class="seg" role="tablist" aria-label="Vue" id="views">
+        <button role="tab" data-v="3d" aria-selected="true">3D</button>
+        <button role="tab" data-v="debit" aria-selected="false">Débit <small id="nSh"></small></button>
+        <button role="tab" data-v="pieces" aria-selected="false">Pièces <small id="nPc"></small></button>
+      </div>
+      </div>
+      <div class="stl"><div class="dims" id="dims"></div>
+      <button class="pbtn" id="tSum" type="button" aria-expanded="true" aria-controls="sum"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M15 4v16M9 10l2 2-2 2"/></svg></button></div>
+    </div>
+    <div class="view" id="v-3d">
+      <p class="hint">Glisser pour tourner · molette ou pincement pour zoomer · cliquer un caisson pour le modifier</p>
+      <div class="selp" id="selp" hidden></div>
+      <div class="cv" id="cv" tabindex="0" aria-label="Maquette 3D : flèches pour tourner, + et − pour zoomer"></div>
+      <div class="tools">
+        <button class="tbtn" id="bOpen" type="button" aria-pressed="false">Ouvrir</button>
+        <label class="exp">Éclaté <input type="range" id="rExp" min="0" max="1" step="0.01" value="0"></label>
+        <div class="tints" id="tints" aria-label="Teinte des façades"></div>
+        <button class="tbtn" id="bFit" type="button">Recentrer</button>
+      </div>
+    </div>
+    <div class="view" id="v-debit" hidden><div class="scrollv">
+      <div class="legend"><span><i style="border-color:#1b1a17"></i>Contour extérieur</span><span><i style="border-color:#f2540f"></i>Découpe intérieure</span><span><i style="border-color:#2744d0;border-top-width:4px"></i>Perçage traversant</span><span><i style="border-color:#c2188f;border-top-style:dashed"></i>Poche, rainure, perçage borgne</span><span>n° = repère de la pièce (A1, B2… = module dans les DXF)</span></div>
+      <div id="sheets"></div></div></div>
+    <div class="view" id="v-pieces" hidden><div class="scrollv"><div class="cards" id="cards"></div></div></div>
+  </section>
+  <aside class="sum" id="sum" aria-label="Fiche de débit">
+    <h2 id="sTitle">Fiche de débit</h2>
+    <p class="sub" id="sSub"></p>
+    <div class="kpis" id="kpis"></div>
+    <ul class="alerts" id="alerts"></ul>
+    <div class="dl"><button class="primary" id="dZip" type="button">Télécharger le pack DXF (.zip)</button></div>
+    <p class="files">Un DXF par panneau et par pièce, la nomenclature (.csv) et une notice.</p>
+    <details class="acc" data-acc="fiche:hw" open><summary><span class="at">Quincaillerie</span><span class="as" id="hwN"></span></summary><div class="ab"><table><tbody id="hw"></tbody></table></div></details>
+    <details class="acc" id="steps" data-acc="fiche:steps" hidden><summary><span class="at">Ordre de montage</span><span class="as" id="stN"></span></summary><div class="ab"><ol class="steps" id="stepsL"></ol></div></details>
+    <details class="acc" data-acc="fiche:files"><summary><span class="at">Autres fichiers</span><span class="as">calepinage, DXF à copier</span></summary><div class="ab dl">
+      <button class="btn" id="dSvg" type="button">Télécharger le calepinage (.svg)</button>
+      <button class="btn" id="dCopy" type="button">Copier le DXF du débit complet</button>
+    </div></details>
+    <details class="acc" data-acc="fiche:conv">
+      <summary><span class="at">Conventions des fichiers DXF</span><span class="as">calques, fraises, faces</span></summary><div class="ab">
+      <ul>
+        <li>Format R12 (AC1009), unités en millimètres, arcs en polylignes à renflement.</li>
+        <li><span class="sw" style="background:#2744d0"></span>DECOUPE_EXT_Dx : contours extérieurs avec la grosse fraise (Ø x), outil à l’extérieur, en dernier.</li>
+        <li><span class="sw" style="background:#f2540f"></span>DECOUPE_INT_Dx : mortaises, poignées, trous de serrage avec la petite fraise (Ø x), outil à l’intérieur, en premier.</li>
+        <li><span class="sw" style="background:#1a9b55"></span>PERCAGE_TRAVERSANT : perçages débouchants.</li>
+        <li><span class="sw" style="background:#c2188f"></span>POCHE_Dxx_Pyy : perçages borgnes Ø xx, profondeur yy ; POCHE_Pyy : poches (rainures de coulissement, mortaises borgnes) à la profondeur yy. Toujours sur la face tournée vers le haut.</li>
+        <li><span class="sw" style="background:#999"></span>ETIQUETTES et PANNEAU : repères et contour du panneau, à ne pas usiner.</li>
+      </ul>
+    </div></details>
+  </aside>
+  <p class="foot">Usinez d’abord une pièce test pour régler le jeu d’emboîtement sur votre machine et votre panneau. Positions de charnières (Ø 35 à 22,5 mm du chant, embases sur la ligne de 37 mm) et entraxes de platines à vérifier selon votre quincaillerie.</p>
+</main>
+<section class="ideas" id="ideas" hidden aria-labelledby="idT">
+  <div class="idl">
+    <h2 id="idT">Mes chutes</h2>
+    <p class="sub">Entrez vos plaques de récupération : l’outil cherche les meubles et objets du catalogue qui tiennent dedans, en ajustant leurs dimensions.</p>
+    <table class="stk">
+      <thead><tr><th scope="col">Longueur</th><th scope="col">Largeur</th><th scope="col">Épaisseur</th><th scope="col">Qté</th><th scope="col"><span class="vh">Retirer</span></th></tr></thead>
+      <tbody id="stRows"></tbody>
+    </table>
+    <p class="help">En millimètres. Mesurez l’épaisseur réelle : les tenons et mortaises en dépendent.</p>
+    <div class="strow"><button class="btn" id="stAdd" type="button">Ajouter une plaque</button><button class="btn" id="stEx" type="button">Exemple</button><button class="btn" id="stClr" type="button">Vider</button></div>
+    <p class="stsum" id="stSum"></p>
+    <button class="primary" id="stGo" type="button">Trouver des idées</button>
+    <p class="help">Les jeux, fraises, marges et l’espacement des pièces sont ceux de la section Usinage de chaque meuble. Un meuble ouvert depuis une idée est débité directement dans vos chutes.</p>
+  </div>
+  <div class="idr">
+    <div class="idprog" id="idProg" hidden><div class="bar"><i id="idBar"></i></div><p id="idTxt" aria-live="polite"></p></div>
+    <p class="idhead" id="idHead">Lancez la recherche pour voir ce que vous pouvez fabriquer avec ces plaques.</p>
+    <div class="idcards" id="idRes"></div>
+    <div id="idNo"></div>
+  </div>
+</section>
+<div class="modal" id="modal" hidden><div role="dialog" aria-modal="true" aria-labelledby="mT"><h3 id="mT">DXF du débit complet</h3><p class="help" style="margin:0">La copie automatique est bloquée ici : sélectionnez le texte, copiez-le et enregistrez-le dans un fichier .dxf.</p><textarea id="mTxt" readonly></textarea><button class="btn" id="mClose" type="button">Fermer</button></div></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="js/core.js"></script>
+<script src="js/ui.js"></script>
+</body>
+</html>

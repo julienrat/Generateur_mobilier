@@ -1,0 +1,15 @@
+{
+  "name": "generateur-mobilier",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Générateur de meubles paramétriques en contreplaqué : aperçu 3D et DXF prêts à usiner sur CNC",
+  "scripts": {
+    "test": "node tests/test.js && node tests/test.js blind && node tests/audit.js",
+    "fuzz": "node tests/fuzz.js && node tests/fuzz.js blind",
+    "bundle": "node tools/bundle.js",
+    "start": "python3 -m http.server 8000"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

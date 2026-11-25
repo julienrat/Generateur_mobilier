@@ -63,3 +63,4 @@ for (const [mod, p] of cases) {
   if (bad.length) { fails++; [...new Set(bad)].slice(0, 14).forEach(b => console.log('   ✗', b)); }
 }
 console.log(fails ? `${fails} case(s) with problems` : 'ALL OK');
+process.exitCode = fails ? 1 : 0;

@@ -44,6 +44,8 @@ Version en un seul fichier HTML, à copier ou envoyer : `node tools/bundle.js` p
 | `js/ui.js` | Interface : catalogue, réglages, 3D (Three.js r128), débit, pièces, Mes chutes, exports |
 | `tests/` | Tests du moteur (Node) |
 | `tools/bundle.js` | Version en un seul fichier |
+| `AGENTS.md`, `CLAUDE.md`, `.claude/` | Guide et outillage pour les agents de code |
+| `.github/` | CI (tests à chaque push et PR) et modèle de PR |
 
 Unités : millimètres. Repère : X largeur, Y hauteur, Z profondeur (l'avant du meuble est du côté des Z positifs).
 
@@ -74,6 +76,15 @@ L'audit (`tests/audit.js`) contrôle chaque angle rentrant. Partout où une autr
    - `CAT` (facultatif) : la fiche du catalogue.
    - `IDEA` (facultatif) : les dimensions que « Mes chutes » peut faire varier.
 3. **`tests/test.js`** : ajouter quelques configurations, puis lancer `npm test`.
+
+## Contribuer
+
+Le travail se fait par branches et pull requests, vérifiées par la CI GitHub Actions. Voir `CONTRIBUTING.md`.
+
+Le dépôt est prêt pour Claude Code et les autres agents de code :
+- `AGENTS.md` : le guide du projet ;
+- `CLAUDE.md` : l'importe pour Claude Code ;
+- `.claude/` : réglages, hook, commandes `/verifier`, `/nouveau-modele` et `/preparer-pr`, et sous-agent `relecteur-cnc`.
 
 ## Crédits
 

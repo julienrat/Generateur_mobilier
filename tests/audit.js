@@ -46,3 +46,4 @@ for (const [mod, p] of cases) {
 console.log(JSON.stringify(tot));
 console.log('ANGLES OÙ UNE PIÈCE APPUIE SANS DÉGAGEMENT :'); Object.entries(missBy).forEach(([k, v]) => console.log('  ✗', k, '×', v));
 console.log('DÉGAGEMENTS SANS PIÈCE EN FACE (sans effet sur l’assemblage) :'); Object.entries(extraBy).sort((a, b) => b[1] - a[1]).slice(0, 25).forEach(([k, v]) => console.log('  ·', k, '×', v));
+process.exitCode = tot.miss ? 1 : 0;

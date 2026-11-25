@@ -1,3 +1,7 @@
 dist/
 node_modules/
 .DS_Store
+
+# Réglages et notes personnels de Claude Code
+.claude/settings.local.json
+CLAUDE.local.md

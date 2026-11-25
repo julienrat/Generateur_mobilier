@@ -42,6 +42,8 @@ const ICO = {
   gueridon: '<svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h22v3H3z"/><path d="M8 9l5 8h2l5-8M13 17l-7 8M15 17l7 8"/></svg>',
   casier: '<svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="22" height="20" rx="1"/><path d="M10.3 3v20M17.6 3v20M3 9.7h22M3 16.3h22M5 23v3M23 23v3"/></svg>',
   chaise: '<svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 2l3 13M11 15h11M21 15l1 11M11 15l-3 11M11 19h10"/><path d="M8.7 5.2h3M9.4 8.8h3"/></svg>',
+  stand: '<svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 3v22M23 3v22M3 25h4M21 25h4"/><rect x="5" y="9" width="18" height="2.6"/><path d="M5 18h18M7.5 5h-1M7.5 13h-1M21.5 5h-1M21.5 13h-1"/></svg>',
+  cloison: '<svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="6" y="2.5" width="16" height="19" rx="1"/><path d="M12 5.5h4M3 22h8M17 22h8"/><circle cx="5" cy="25" r="1.4"/><circle cx="10" cy="25" r="1.4"/><circle cx="18" cy="25" r="1.4"/><circle cx="23" cy="25" r="1.4"/></svg>',
   home: '<svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="9" height="9" rx="1.5"/><rect x="16" y="3" width="9" height="9" rx="1.5"/><rect x="3" y="16" width="9" height="9" rx="1.5"/><rect x="16" y="16" width="9" height="9" rx="1.5"/></svg>'
 };
 const CASTER = [
@@ -133,7 +135,7 @@ const MODS = {
   tabouret: { n: 'Tabouret', tab: 'Tabouret', g: 'atelier',
     P: [PL('H', 'Hauteur d’assise', 350, 800, 5, 'mm'), PL('Ds', 'Ø de l’assise', 250, 450, 5, 'mm'), PL('B', 'Empattement au sol', 250, 560, 5, 'mm'), { k: 'rest', l: 'Repose-pieds', c: 1 }, PL('yr', 'Hauteur du repose-pieds', 150, 450, 5, 'mm', p => p.rest)],
     d: { H: 650, Ds: 340, B: 400, rest: true, yr: 280 },
-    pre: [['Tabouret de bar 650 mm', { H: 650, Ds: 340, B: 400, rest: true, yr: 280 }], ['Tabouret d’atelier 450 mm', { H: 450, Ds: 300, B: 340, rest: false }], ['Tabouret haut 750 mm', { H: 750, Ds: 360, B: 460, rest: true, yr: 320 }]] },
+    pre: [['Tabouret de bar 650 mm', { H: 650, Ds: 340, B: 400, rest: true, yr: 280 }], ['Tabouret d’atelier 450 mm', { H: 450, Ds: 300, B: 340, rest: false }], ['Tabouret haut 750 mm', { H: 750, Ds: 360, B: 460, rest: true, yr: 320 }], ['Tabouret d’enfant 350 mm', { H: 350, Ds: 260, B: 280, rest: false }]] },
   mural: { n: 'Panneau mural à fentes', tab: 'Panneau mural', g: 'atelier',
     P: [{ sec: 'Panneau' }, PL('W', 'Largeur', 400, 2400, 10, 'mm'), PL('H', 'Hauteur', 300, 1200, 10, 'mm'), PL('pitch', 'Pas des fentes', 45, 100, 1, 'mm'), { k: 'ent', l: 'Entretoises murales', o: [['fine', 'Épaisseur fine'], ['structure', 'Épaisseur structure']] },
       { sec: 'Accessoires accrochés' }, PL('nE', 'Étagères', 0, 6, 1, ''), PL('nR', 'Râteliers percés (tournevis, ciseaux…)', 0, 4, 1, ''), PL('kE', 'Largeur des étagères et râteliers, en pas', 3, 12, 1, '', p => p.nE + p.nR > 0),
@@ -151,39 +153,54 @@ const MODS = {
     d: { L: 450, Wd: 260, Hh: 300, hs: 120 },
     pre: [['Porte-outils 450 mm', { L: 450, Wd: 260, Hh: 300, hs: 120 }], ['Caisse à outils longue 650 mm', { L: 650, Wd: 220, Hh: 280, hs: 110 }], ['Porte-pots de peinture 350 × 350', { L: 350, Wd: 350, Hh: 330, hs: 150 }]] },
   table: { n: 'Table et bureau', tab: 'Table', g: 'tables',
-    P: [{ sec: 'Dimensions' }, PL('L', 'Longueur', 600, 3000, 10, 'mm'), PL('P', 'Profondeur', 280, 1400, 10, 'mm'), PL('H', 'Hauteur', 350, 1150, 5, 'mm'),
+    P: [{ sec: 'Dimensions' }, PL('L', 'Longueur', 600, 4800, 10, 'mm'), PL('P', 'Profondeur', 280, 1400, 10, 'mm'), PL('H', 'Hauteur', 350, 1150, 5, 'mm'),
       { k: 'forme', l: 'Forme du plateau', o: [['rect', 'Droit'], ['arrondi', 'Arrondi'], ['stade', 'Stade']] }, PL('R', 'Rayon des angles', 5, 300, 5, 'mm', p => p.forme === 'arrondi'),
-      { sec: 'Piètement', open: 1, sum: p => `${p.pied === 'A' ? 'en A ajouré' : 'plein'} · traverse ${({ cle: 'à clés', vis: 'collée', aucune: 'aucune' })[p.trav]} · ${p.rail ? 'longeron' : 'sans longeron'}` },
-      { k: 'pied', l: 'Piètement', o: [['A', 'En A ajouré'], ['plaque', 'Plein']] }, PL('wt', 'Largeur du piètement sous le plateau', 160, 1200, 10, 'mm', p => p.pied === 'A'),
+      { sec: 'Piètement', open: 1, sum: p => `${p.nP === 3 ? '3 piètements ' : ''}${p.pied === 'A' ? 'en A ajouré' : 'plein'} · traverse ${({ cle: 'à clés', vis: 'collée', aucune: 'aucune' })[p.trav]} · ${p.rail ? 'longeron' : 'sans longeron'}` },
+      { k: 'pied', l: 'Piètement', o: [['A', 'En A ajouré'], ['plaque', 'Plein']] }, { k: 'nP', l: 'Nombre de piètements', o: [[2, '2'], [3, '3, avec un central']] }, PL('wt', 'Largeur du piètement sous le plateau', 160, 1200, 10, 'mm', p => p.pied === 'A'),
       PL('ov', 'Débord du plateau aux extrémités', 30, 600, 5, 'mm'), { k: 'trav', l: 'Traverse basse', o: [['cle', 'À clés'], ['vis', 'Collée'], ['aucune', 'Aucune']] },
       PL('ytr', 'Hauteur de la traverse', 60, 600, 5, 'mm', p => p.trav !== 'aucune'), { k: 'rail', l: 'Longeron sous le plateau', c: 1 },
       { sec: 'Plateau', sum: p => `tenons ${p.fix === 'traversant' ? 'apparents' : 'cachés'}${p.cable ? ' · passe-câbles' : ''}` }, { k: 'fix', l: 'Tenons dans le plateau', o: [['borgne', 'Cachés (borgnes)'], ['traversant', 'Apparents']] }, { k: 'cable', l: 'Passe-câbles Ø 60', c: 1 }],
-    d: { L: 1600, P: 800, H: 740, forme: 'arrondi', R: 40, pied: 'A', wt: 420, ov: 180, trav: 'cle', ytr: 150, rail: true, fix: 'borgne', cable: false },
+    d: { L: 1600, P: 800, H: 740, forme: 'arrondi', R: 40, pied: 'A', nP: 2, wt: 420, ov: 180, trav: 'cle', ytr: 150, rail: true, fix: 'borgne', cable: false },
     pre: [['Table de repas 1600 × 800', { L: 1600, P: 800, H: 740, forme: 'arrondi', R: 40, pied: 'A', wt: 420, ov: 180, trav: 'cle', ytr: 150, rail: true, fix: 'borgne', cable: false }],
       ['Bureau 1400 × 700 avec passe-câbles', { L: 1400, P: 700, H: 730, forme: 'rect', pied: 'A', wt: 380, ov: 150, trav: 'cle', ytr: 150, rail: true, fix: 'borgne', cable: true }],
       ['Table de réunion 2400 × 1100', { L: 2400, P: 1100, H: 740, forme: 'stade', pied: 'A', wt: 600, ov: 350, trav: 'cle', ytr: 160, rail: true, fix: 'borgne', cable: true }],
       ['Table haute 1400 × 700', { L: 1400, P: 700, H: 1050, forme: 'arrondi', R: 60, pied: 'A', wt: 360, ov: 180, trav: 'cle', ytr: 300, rail: true, fix: 'borgne', cable: false }],
       ['Table basse 1100 × 550', { L: 1100, P: 550, H: 400, forme: 'arrondi', R: 80, pied: 'plaque', ov: 120, trav: 'aucune', rail: true, fix: 'borgne', cable: false }],
-      ['Banc 1400 × 330', { L: 1400, P: 330, H: 450, forme: 'rect', pied: 'plaque', ov: 160, trav: 'cle', ytr: 120, rail: false, fix: 'traversant', cable: false }]] },
+      ['Banc 1400 × 330', { L: 1400, P: 330, H: 450, forme: 'rect', pied: 'plaque', ov: 160, trav: 'cle', ytr: 120, rail: false, fix: 'traversant', cable: false }],
+      ['Plan de travail 4 places 2400 × 950', { L: 2400, P: 950, H: 738, forme: 'rect', pied: 'A', nP: 2, wt: 520, ov: 300, trav: 'cle', ytr: 150, rail: true, fix: 'borgne', cable: true }],
+      ['Grande table de réunion 4400 × 1180', { L: 4400, P: 1180, H: 738, forme: 'stade', pied: 'A', nP: 3, wt: 700, ov: 450, trav: 'cle', ytr: 160, rail: true, fix: 'borgne', cable: true }]] },
   gueridon: { n: 'Table à pied central', tab: 'Guéridon', g: 'tables',
     P: [PL('D', 'Diamètre ou côté du plateau', 350, 1000, 5, 'mm'), { k: 'forme', l: 'Plateau', o: [['rond', 'Rond'], ['carre', 'Carré']] }, PL('H', 'Hauteur', 400, 1150, 5, 'mm'), PL('B', 'Empattement du pied', 300, 900, 5, 'mm'),
       { k: 'fix', l: 'Tenons dans le plateau', o: [['borgne', 'Cachés (borgnes)'], ['traversant', 'Apparents']] }],
     d: { D: 700, forme: 'rond', H: 740, B: 560, fix: 'borgne' },
-    pre: [['Table de café Ø 700', { D: 700, forme: 'rond', H: 740, B: 560 }], ['Mange-debout Ø 600', { D: 600, forme: 'rond', H: 1050, B: 600 }], ['Table d’appoint Ø 450', { D: 450, forme: 'rond', H: 520, B: 380 }], ['Table carrée 700 × 700', { D: 700, forme: 'carre', H: 740, B: 580 }]] },
+    pre: [['Table de café Ø 700', { D: 700, forme: 'rond', H: 740, B: 560 }], ['Mange-debout Ø 600', { D: 600, forme: 'rond', H: 1050, B: 600 }], ['Table d’appoint Ø 450', { D: 450, forme: 'rond', H: 520, B: 380 }], ['Table carrée 700 × 700', { D: 700, forme: 'carre', H: 740, B: 580 }], ['Table d’enfant Ø 600', { D: 600, forme: 'rond', H: 460, B: 460 }]] },
   casier: { n: 'Étagère à casiers', tab: 'Casiers', g: 'rangement',
     P: [PL('W', 'Largeur', 300, 2000, 10, 'mm'), PL('H', 'Hauteur', 300, 2200, 10, 'mm'), PL('D', 'Profondeur', 200, 600, 10, 'mm'), PL('nx', 'Colonnes de cases', 1, 8, 1, ''), PL('ny', 'Rangées de cases', 1, 8, 1, ''),
-      PL('hp', 'Hauteur des pieds (0 = posé au sol)', 0, 200, 5, 'mm'), { k: 'back', l: 'Dos assemblé', c: 1 },
+      PL('hp', 'Hauteur des pieds (0 = posé au sol)', 0, 200, 5, 'mm'), { k: 'back', l: 'Dos assemblé', c: 1 }, { k: 'jard', l: 'Jardinière sur le dessus', c: 1 }, PL('hj', 'Hauteur de la jardinière', 120, 400, 10, 'mm', p => p.jard),
       { sec: 'Portes', sum: p => p.portes === 'aucune' ? 'cases ouvertes' : (p.portes === 'bas' ? 'rangée du bas' : 'toutes les cases') + ' · poignées ' + ({ decoupe: 'découpées', percage: 'à visser', aucune: 'aucune' })[p.handle] },
       { k: 'portes', l: 'Portes encastrées', o: [['aucune', 'Aucune'], ['bas', 'Rangée du bas'], ['toutes', 'Partout']] }, { ...HANDLE, if: p => p.portes !== 'aucune' }, { ...GAPF, if: p => p.portes !== 'aucune' }],
-    d: { W: 1000, H: 1050, D: 380, nx: 3, ny: 3, hp: 60, back: true, portes: 'aucune', handle: 'decoupe', gapF: 3 },
+    d: { W: 1000, H: 1050, D: 380, nx: 3, ny: 3, hp: 60, back: true, portes: 'aucune', handle: 'decoupe', gapF: 3, jard: false, hj: 200 },
     pre: [['Étagère 3 × 3 cases', { W: 1000, H: 1050, D: 380, nx: 3, ny: 3, hp: 60, back: true, portes: 'aucune' }], ['Casiers à portes 3 × 3', { W: 1000, H: 1050, D: 380, nx: 3, ny: 3, hp: 60, back: true, portes: 'toutes' }],
       ['Meuble bas 4 × 2, portes en bas', { W: 1300, H: 750, D: 400, nx: 4, ny: 2, hp: 80, back: true, portes: 'bas' }], ['Banquette à casiers 3 × 1', { W: 1200, H: 450, D: 400, nx: 3, ny: 1, hp: 0, back: true, portes: 'aucune' }],
-      ['Bibliothèque 2 × 5 cases', { W: 800, H: 1900, D: 320, nx: 2, ny: 5, hp: 60, back: true, portes: 'aucune' }]] },
+      ['Bibliothèque 2 × 5 cases', { W: 800, H: 1900, D: 320, nx: 2, ny: 5, hp: 60, back: true, portes: 'aucune' }],
+      ['Casiers jardinière 3 × 2', { W: 1000, H: 800, D: 400, nx: 3, ny: 2, hp: 60, back: true, portes: 'aucune', jard: true, hj: 200 }],
+      ['Bout de canapé 1 × 2', { W: 450, H: 450, D: 450, nx: 1, ny: 2, hp: 0, back: false, portes: 'aucune', jard: false }]] },
   chaise: { n: 'Chaise', tab: 'Chaise', g: 'assises',
     P: [PL('Hs', 'Hauteur d’assise', 380, 800, 5, 'mm'), PL('W', 'Largeur', 360, 600, 5, 'mm'), PL('D', 'Profondeur au sol', 380, 620, 5, 'mm'), PL('Hb', 'Hauteur du dossier', 650, 1150, 5, 'mm'),
       PL('inc', 'Inclinaison du dossier', 0, 18, 1, '°'), PL('nl', 'Lattes de dossier', 1, 5, 1, ''), { k: 'trav', l: 'Traverses basses', c: 1 }, PL('yst', 'Hauteur des traverses', 100, 500, 5, 'mm', p => p.trav)],
     d: { Hs: 450, W: 440, D: 480, Hb: 820, inc: 10, nl: 3, trav: true, yst: 150 },
-    pre: [['Chaise de table', { Hs: 450, W: 440, D: 480, Hb: 820, inc: 10, nl: 3, trav: true, yst: 150 }], ['Chaise haute de bar', { Hs: 650, W: 420, D: 520, Hb: 980, inc: 8, nl: 2, trav: true, yst: 300 }]] }
+    pre: [['Chaise de table', { Hs: 450, W: 440, D: 480, Hb: 820, inc: 10, nl: 3, trav: true, yst: 150 }], ['Chaise haute de bar', { Hs: 650, W: 420, D: 520, Hb: 980, inc: 8, nl: 2, trav: true, yst: 300 }]] },
+  stand: { n: 'Bureau debout réglable', tab: 'Bureau debout', g: 'tables',
+    P: [PL('L', 'Largeur', 900, 2400, 10, 'mm'), PL('P', 'Profondeur', 600, 1000, 10, 'mm'),
+      { sec: 'Hauteurs du plateau', open: 1, sum: p => `${p.h1} / ${p.h2} / ${p.h3} mm · affiché ${['assis', 'haut', 'debout'][p.niv - 1] || ''}` },
+      PL('h1', 'Assis', 680, 800, 5, 'mm'), PL('h2', 'Haut (tabouret)', 850, 980, 5, 'mm'), PL('h3', 'Debout', 1000, 1200, 5, 'mm'),
+      { k: 'niv', l: 'Position affichée', o: [[1, 'Assis'], [2, 'Haut'], [3, 'Debout']] }, PL('ytr', 'Hauteur de la traverse basse', 80, 300, 5, 'mm')],
+    d: { L: 1200, P: 800, h1: 740, h2: 910, h3: 1090, niv: 3, ytr: 150 },
+    pre: [['Bureau debout 1200 × 800', { L: 1200, P: 800, h1: 740, h2: 910, h3: 1090, niv: 3 }], ['Bureau debout 1600 × 800', { L: 1600, P: 800, h1: 740, h2: 910, h3: 1090, niv: 3 }], ['Poste compact 1000 × 700', { L: 1000, P: 700, h1: 730, h2: 900, h3: 1080, niv: 1 }]] },
+  cloison: { n: 'Cloison mobile', tab: 'Cloison', g: 'rangement',
+    P: [PL('W', 'Largeur', 600, 1200, 10, 'mm'), PL('H', 'Hauteur', 900, 2100, 10, 'mm'), PL('D', 'Longueur des pieds', 350, 800, 10, 'mm'), { k: 'roul', l: 'Sur roulettes', c: 1 }, { k: 'poig', l: 'Poignée découpée', c: 1 }],
+    d: { W: 1000, H: 1800, D: 600, roul: true, poig: true },
+    pre: [['Cloison mobile 1000 × 1800', { W: 1000, H: 1800, D: 600, roul: true, poig: true }], ['Paravent 1200 × 1500', { W: 1200, H: 1500, D: 500, roul: false, poig: false }], ['Tableau mobile 1200 × 1900', { W: 1200, H: 1900, D: 650, roul: true, poig: true }]] }
 };
 const MP = [
   { sec: 'Épaisseurs et panneaux', sum: m => `${mm(m.t)} / ${mm(m.tD)} / ${mm(m.tF)} mm · ${m.useStock ? 'mes chutes' : m.sheet === 'custom' ? mm(m.sw) + ' × ' + mm(m.sh) : m.sheet.replace('x', ' × ')}` },
@@ -207,17 +224,16 @@ MPh('t').h = 'Mesurez-la au pied à coulisse : les mortaises en dépendent.'; MP
 MPh('pS').h = 'Prix indicatifs : saisissez ceux de votre fournisseur.';
 MPh('toolI').h = 'Opération 1 avec cette fraise (intérieurs, perçages), puis changement d’outil pour les contours : dégagements d’angles plus petits.';
 const MDEF = { t: 18, tD: 12, tF: 6, backThin: true, toolO: 6, toolI: 4, dogStyle: 'dog', blind: false, skin: 3, jeuC: 1, preDrill: true, jeu: 0.2, tabLen: 40, fingerW: 60, dep: 0, useStock: false, sheet: '2500x1250', sw: 2500, sh: 1250, gap: 12, margin: 15, rot: true, dens: 680, pS: 95, pD: 75, pF: 35 };
-const TINTS = [['bouleau', 'Bouleau', '#e9cd97'], ['blanc', 'Blanc', '#f1efe9'], ['anthracite', 'Anthracite', '#3a3d43'], ['rouge', 'Rouge oxyde', '#b1452c'], ['jaune', 'Jaune', '#e8b324']];
 const KEY = 'meubles-cnc-v4';
 const clone = o => JSON.parse(JSON.stringify(o));
 
 const STOCK0 = [{ w: 1200, h: 600, th: 18, n: 2 }, { w: 800, h: 450, th: 18, n: 3 }, { w: 1000, h: 500, th: 12, n: 2 }, { w: 600, h: 400, th: 6, n: 2 }];
-let st = { mod: 'compo', P: {}, M: { ...MDEF }, view: '3d', open: false, tint: 'bouleau', stock: clone(STOCK0), acc: {}, ui: { ctl: true, sum: true, guide: true } };
+let st = { mod: 'compo', P: {}, M: { ...MDEF }, view: '3d', open: false, stock: clone(STOCK0), acc: {}, ui: { ctl: true, sum: true, guide: true } };
 Object.keys(MODS).forEach(k => { st.P[k] = clone(MODS[k].d); });
 try {
   const sv = JSON.parse(localStorage.getItem(KEY) || 'null');
   if (sv && MODS[sv.mod]) {
-    st.mod = sv.mod; st.tint = TINTS.some(t => t[0] === sv.tint) ? sv.tint : 'bouleau';
+    st.mod = sv.mod;
     Object.keys(MODS).forEach(k => { if (sv.P && sv.P[k]) st.P[k] = { ...clone(MODS[k].d), ...sv.P[k] }; });
     if (sv.M) st.M = { ...MDEF, ...sv.M };
   }
@@ -226,7 +242,7 @@ try {
   if (sv && Array.isArray(sv.stock)) st.stock = sv.stock.filter(q => q && q.w > 0 && q.h > 0 && q.th > 0).map(q => ({ w: +q.w, h: +q.h, th: +q.th, n: Math.max(1, +q.n || 1) }));
 } catch (e) { }
 let saveT = 0;
-function save() { clearTimeout(saveT); saveT = setTimeout(() => { try { localStorage.setItem(KEY, JSON.stringify({ mod: st.mod, P: st.P, M: st.M, tint: st.tint, stock: st.stock, acc: st.acc, ui: st.ui })); } catch (e) { } }, 300); }
+function save() { clearTimeout(saveT); saveT = setTimeout(() => { try { localStorage.setItem(KEY, JSON.stringify({ mod: st.mod, P: st.P, M: st.M, stock: st.stock, acc: st.acc, ui: st.ui })); } catch (e) { } }, 300); }
 function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('on'), 3800); }
 
 /* ---------- réglages ---------- */
@@ -536,11 +552,16 @@ const STEPS = {
   mural: ['Visser les entretoises au mur (chevilles), d’aplomb.', 'Visser le panneau sur les entretoises par les trous prévus.', 'Assembler chaque accessoire (tenons collés).', 'Accrocher : soulever, engager le crochet et l’ergot dans deux fentes l’une sous l’autre, laisser descendre.'],
   chutes: ['Boulonner les roulettes sous le socle.', 'Coller les joues, le dos et le rebord dans le socle et entre eux.', 'Glisser les séparateurs dans les mortaises du socle, du dos et du rebord ; visser aux tenons.'],
   caddie: ['Coller le fond dans les deux côtés, puis fermer avec les bouts (queues droites).', 'Engager la cloison-poignée dans le fond et les deux bouts, coller.'],
+  stand: ['Engager la traverse basse dans les deux joues, chasser une clé de chaque côté.', 'Engager les deux longerons à la hauteur voulue (assis, haut ou debout) et chasser leurs clés.', 'Poser le plateau sur les tenons des longerons, sans colle.', 'Pour changer de hauteur : soulever le plateau, retirer les clés et passer les longerons dans les mortaises du niveau voulu.'],
+  cloison: p => ['Coller les tenons des pieds dans les semelles.', 'Engager les lisses basses dans les deux pieds.', 'Croiser le panneau avec les pieds à mi-bois (entailles du panneau par le bas), coller.', p.roul ? 'Visser les roulettes sous les semelles, celles à frein en diagonale.' : 'Poser les patins sous les semelles.'],
   table: p => [p.trav === 'cle' ? 'Engager la traverse basse dans les deux piètements, puis enfoncer une clé au maillet de chaque côté (sans colle : la table reste démontable).' : p.trav === 'vis' ? 'Coller la traverse basse dans les mortaises des deux piètements.' : '',
-    p.rail ? 'Engager le longeron dans le haut des deux piètements.' : '', 'Retourner le plateau, poser le piètement sur ses mortaises, coller et visser en biais aux tenons.', 'Poser les patins.'].filter(Boolean),
+    p.nP === 3 || p.L > 2440 ? 'Au piètement central, les demi-tenons des deux travées se rejoignent dans la même mortaise : les coller.' : '',
+    p.rail ? 'Engager le longeron dans le haut des piètements.' : '', p.L > 2440 ? 'Plateau en deux parties : coller les clés de jonction dans les poches du dessous et serrer les deux moitiés l’une contre l’autre.' : '',
+    'Retourner le plateau, poser le piètement sur ses mortaises, coller et visser en biais aux tenons.', 'Poser les patins.'].filter(Boolean),
   gueridon: ['Croiser les deux pieds à mi-bois (l’entaille du haut dans celle du bas), coller.', 'Coller le plateau sur les tenons du haut des pieds, poser les patins.'],
   casier: p => ['Coller le dessous' + (p.back ? ' et le dos' : '') + ' dans une joue.', 'Engager les montants dans le dessous, puis glisser les tablettes par l’avant : leurs entailles arrière s’emboîtent dans celles des montants.',
-    'Fermer avec la seconde joue et le dessus (queues droites), coller et serrer.', p.portes !== 'aucune' ? 'Visser les embases des charnières sur les montants et les joues, clipser les portes, régler.' : ''].filter(Boolean),
+    'Fermer avec la seconde joue et le dessus (queues droites), coller et serrer.', p.portes !== 'aucune' ? 'Visser les embases des charnières sur les montants et les joues, clipser les portes, régler.' : '',
+    p.jard ? 'Assembler la jardinière (queues droites), l’engager dans les mortaises du dessus, coller, puis glisser un bac étanche.' : ''].filter(Boolean),
   chaise: p => ['Coller les lattes du dossier' + (p.trav ? ' et les traverses basses' : '') + ' dans une joue, fermer avec la seconde, serrer à plat.', 'Poser l’assise sur les tenons des joues (mortaises borgnes dessous), coller et visser en biais par-dessous.', 'Poser les patins.']
 };
 const price = th => th === st.M.t ? st.M.pS : th === st.M.tD ? st.M.pD : st.M.pF;
@@ -647,7 +668,7 @@ $('#views').addEventListener('click', e => {
 
 /* ---------- 3D : pièces extrudées depuis leur contour usiné ---------- */
 let V = null, b3t = 0;
-const ROLE = { caisse: '#e3c38b', tiroir: '#edd7a8', plateau: '#d6a964', base: '#d9b47c' };
+const ROLE = { caisse: '#e3c38b', tiroir: '#edd7a8', plateau: '#d6a964', base: '#d9b47c', facade: '#e9cd97' };
 function woodTex() {
   const c = document.createElement('canvas'); c.width = c.height = 256; const g = c.getContext('2d');
   let sd = 7; const rnd = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
@@ -660,11 +681,10 @@ function woodTex() {
   const t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(1 / 420, 1 / 420); return t;
 }
 function mat(role) {
-  const key = role + '|' + st.tint; if (V.mats[key]) return V.mats[key];
-  const tint = TINTS.find(t => t[0] === st.tint), painted = role === 'facade' && st.tint !== 'bouleau';
-  const col = role === 'facade' ? tint[2] : ROLE[role] || ROLE.caisse;
-  const face = new THREE.MeshStandardMaterial({ color: col, roughness: painted ? 0.5 : 0.8, map: painted ? null : V.tex });
-  const edge = new THREE.MeshStandardMaterial({ color: new THREE.Color(painted ? '#e3c38b' : col).multiplyScalar(0.8), roughness: 0.9 });
+  const key = role; if (V.mats[key]) return V.mats[key];
+  const col = ROLE[role] || ROLE.caisse;
+  const face = new THREE.MeshStandardMaterial({ color: col, roughness: 0.8, map: V.tex });
+  const edge = new THREE.MeshStandardMaterial({ color: new THREE.Color(col).multiplyScalar(0.8), roughness: 0.9 });
   return (V.mats[key] = [face, edge]);
 }
 function samp(v) {
@@ -899,12 +919,6 @@ function pick(e) {
 $('#bOpen').addEventListener('click', e => { st.open = !st.open; e.currentTarget.setAttribute('aria-pressed', String(st.open)); e.currentTarget.textContent = st.open ? 'Fermer' : 'Ouvrir'; });
 $('#rExp').addEventListener('input', e => { if (!V) return; V.expl = +e.target.value; fit(); V.dirty = true; });
 $('#bFit').addEventListener('click', () => { if (!V) return; V.zoom = 1; V.th = 0.62; V.ph = 1.1; V.dirty = true; });
-$('#tints').innerHTML = TINTS.map(([k, l, c]) => `<button type="button" data-t="${k}" aria-label="Façades ${l}" title="Façades ${l}" aria-pressed="${k === st.tint}" style="background:${c}"></button>`).join('');
-$('#tints').addEventListener('click', e => {
-  const b = e.target.closest('button'); if (!b) return;
-  st.tint = b.dataset.t; document.querySelectorAll('#tints button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
-  if (V) build3d(false); save();
-});
 
 /* ---------- exports ---------- */
 function csv() {
@@ -992,7 +1006,7 @@ applyPanels(); applyGuide();
 const IDEA = { compo: { size: ['L', 'P'], strong: 1 }, tiroirs: { size: ['W', 'H', 'D'] }, placard: { size: ['W', 'H', 'D'] }, etagere: { size: ['W', 'H', 'D'] },
   etabli: { size: ['L', 'P'], strong: 1 }, base: { size: ['W', 'D'], strong: 1 }, treteau: { size: ['L'], count: 'n', strong: 1 }, caisse: { size: ['W', 'D', 'H'], count: 'n' },
   tabouret: { size: ['Ds', 'B'], down: ['H'], strong: 1 }, mural: { size: ['W', 'H'] }, chutes: { size: ['W', 'D', 'H'], strong: 1 }, caddie: { size: ['L', 'Wd', 'Hh', 'hs'] },
-  table: { size: ['L', 'P'], strong: 1 }, gueridon: { size: ['D', 'B'], strong: 1 }, casier: { size: ['W', 'H', 'D'] }, chaise: { size: ['W'], strong: 1 } };
+  table: { size: ['L', 'P'], strong: 1 }, gueridon: { size: ['D', 'B'], strong: 1 }, casier: { size: ['W', 'H', 'D'] }, chaise: { size: ['W'], strong: 1 }, stand: { size: ['L', 'P'], strong: 1 }, cloison: { size: ['W', 'H'] } };
 const BADW = /trop|étroit|basculer|peu profond|impossible|ne tient pas/i;
 let IDV = false, IDRUN = 0, IDRES = null, IDSTALE = false;
 const stockArea = () => st.stock.reduce((a, q) => a + q.w * q.h * q.n, 0);
@@ -1119,25 +1133,34 @@ $('#idRes').addEventListener('click', e => {
 
 
 /* ---------- catalogue : page d'accueil, vignettes 3D qui tournent au survol ---------- */
-const CATS = [['tables', 'Tables et bureaux'], ['assises', 'Assises'], ['rangement', 'Rangement'], ['atelier', 'Atelier']];
+const CATS = [['tables', 'Tables et bureaux'], ['assises', 'Assises'], ['rangement', 'Rangement et cloisons'], ['atelier', 'Atelier']];
 const CAT = [
-  { c: 'tables', m: 'table', i: 0, n: 'Table de repas', d: 'Piètements en A, traverse à clés : se démonte sans outil', nw: 1 },
-  { c: 'tables', m: 'table', i: 1, n: 'Bureau', d: 'Longeron sous plateau, passe-câbles', nw: 1 },
-  { c: 'tables', m: 'table', i: 2, n: 'Table de réunion', d: 'Plateau en stade, 8 à 10 places', nw: 1 },
-  { c: 'tables', m: 'table', i: 3, n: 'Table haute', d: 'Hauteur bar, pour les réunions debout', nw: 1 },
-  { c: 'tables', m: 'table', i: 4, n: 'Table basse', d: 'Piètement plein, angles arrondis', nw: 1 },
-  { c: 'tables', m: 'gueridon', i: 0, n: 'Table de café', d: 'Pied central croisé, plateau rond', nw: 1 },
-  { c: 'tables', m: 'gueridon', i: 1, n: 'Mange-debout', d: 'Plateau rond à 1 050 mm', nw: 1 },
-  { c: 'tables', m: 'gueridon', i: 2, n: 'Table d’appoint', d: 'Petit guéridon de bout de canapé', nw: 1 },
-  { c: 'assises', m: 'chaise', i: 0, n: 'Chaise', d: 'Joues d’un seul tenant, dossier incliné à lattes', nw: 1 },
-  { c: 'assises', m: 'chaise', i: 1, n: 'Chaise haute', d: 'Assise à 650 mm, traverses repose-pieds', nw: 1 },
-  { c: 'assises', m: 'table', i: 5, n: 'Banc', d: 'Deux places, tenons apparents dans l’assise', nw: 1 },
+  { c: 'tables', m: 'table', i: 0, n: 'Table de repas', d: 'Piètements en A, traverse à clés : se démonte sans outil' },
+  { c: 'tables', m: 'table', i: 1, n: 'Bureau', d: 'Longeron sous plateau, passe-câbles' },
+  { c: 'tables', m: 'table', i: 2, n: 'Table de réunion', d: 'Plateau en stade, 8 à 10 places' },
+  { c: 'tables', m: 'table', i: 3, n: 'Table haute', d: 'Hauteur bar, pour les réunions debout' },
+  { c: 'tables', m: 'table', i: 4, n: 'Table basse', d: 'Piètement plein, angles arrondis' },
+  { c: 'tables', m: 'gueridon', i: 0, n: 'Table de café', d: 'Pied central croisé, plateau rond' },
+  { c: 'tables', m: 'gueridon', i: 1, n: 'Mange-debout', d: 'Plateau rond à 1 050 mm' },
+  { c: 'tables', m: 'gueridon', i: 2, n: 'Table d’appoint', d: 'Petit guéridon de bout de canapé' },
+  { c: 'tables', m: 'stand', i: 0, n: 'Bureau debout réglable', d: 'Trois hauteurs : assis, haut et debout', nw: 1 },
+  { c: 'tables', m: 'table', i: 6, n: 'Plan de travail 4 places', d: '2,4 m, longeron et passe-câbles', nw: 1 },
+  { c: 'tables', m: 'table', i: 7, n: 'Grande table de réunion', d: '4,4 m, 3 piètements, plateau en deux parties', nw: 1 },
+  { c: 'tables', m: 'gueridon', i: 4, n: 'Table d’enfant', d: 'Plateau rond à 460 mm de haut', nw: 1 },
+  { c: 'assises', m: 'chaise', i: 0, n: 'Chaise', d: 'Joues d’un seul tenant, dossier incliné à lattes' },
+  { c: 'assises', m: 'chaise', i: 1, n: 'Chaise haute', d: 'Assise à 650 mm, traverses repose-pieds' },
+  { c: 'assises', m: 'table', i: 5, n: 'Banc', d: 'Deux places, tenons apparents dans l’assise' },
   { c: 'assises', m: 'tabouret', i: 0, n: 'Tabouret de bar', d: 'Pieds croisés à mi-bois, repose-pieds' },
   { c: 'assises', m: 'tabouret', i: 1, n: 'Tabouret bas', d: 'Assise ronde à 450 mm' },
-  { c: 'rangement', m: 'casier', i: 0, n: 'Étagère à casiers', d: 'Montants et tablettes croisés à mi-bois', nw: 1 },
-  { c: 'rangement', m: 'casier', i: 1, n: 'Casiers à portes', d: 'Portes encastrées, charnières invisibles', nw: 1 },
-  { c: 'rangement', m: 'casier', i: 2, n: 'Meuble bas à casiers', d: '4 × 2 cases, portes en bas', nw: 1 },
-  { c: 'rangement', m: 'casier', i: 4, n: 'Bibliothèque à casiers', d: '2 × 5 cases sur pieds', nw: 1 },
+  { c: 'assises', m: 'tabouret', i: 3, n: 'Tabouret d’enfant', d: 'Assise à 350 mm, va avec la table d’enfant', nw: 1 },
+  { c: 'rangement', m: 'casier', i: 0, n: 'Étagère à casiers', d: 'Montants et tablettes croisés à mi-bois' },
+  { c: 'rangement', m: 'casier', i: 1, n: 'Casiers à portes', d: 'Portes encastrées, charnières invisibles' },
+  { c: 'rangement', m: 'casier', i: 2, n: 'Meuble bas à casiers', d: '4 × 2 cases, portes en bas' },
+  { c: 'rangement', m: 'casier', i: 4, n: 'Bibliothèque à casiers', d: '2 × 5 cases sur pieds' },
+  { c: 'rangement', m: 'casier', i: 5, n: 'Casiers jardinière', d: 'Bac à plantes sur le dessus', nw: 1 },
+  { c: 'rangement', m: 'casier', i: 6, n: 'Bout de canapé', d: 'Petit casier ouvert 1 × 2', nw: 1 },
+  { c: 'rangement', m: 'cloison', i: 0, n: 'Cloison mobile', d: 'Panneau sur roulettes, poignée découpée', nw: 1 },
+  { c: 'rangement', m: 'cloison', i: 1, n: 'Paravent', d: 'Posé sur patins, 1200 × 1500', nw: 1 },
   { c: 'rangement', m: 'etagere', i: 0, n: 'Étagère ouverte', d: 'Tablettes assemblées, socle' },
   { c: 'rangement', m: 'placard', i: 0, n: 'Meuble bas à portes', d: 'Charnières invisibles, tablette réglable' },
   { c: 'rangement', m: 'tiroirs', i: 1, n: 'Caisson de bureau', d: '3 tiroirs sur roulettes' },
@@ -1242,7 +1265,7 @@ function galSpin(el) {
   requestAnimationFrame(loop);
 }
 function galShow() {
-  const key = JSON.stringify([st.M.t, st.M.tD, st.M.tF, st.M.backThin, st.M.blind, st.tint]);
+  const key = JSON.stringify([st.M.t, st.M.tD, st.M.tF, st.M.backThin, st.M.blind]);
   if (key !== galKey) { GG.forEach((v, k) => { if (k[0] === 'g') v.traverse(n => { if (n.geometry) n.geometry.dispose(); }); }); GG.clear(); if (GAL) GAL.cur = null; galKey = key; renderHome(); }
   else galResume();
 }

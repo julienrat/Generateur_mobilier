@@ -12,7 +12,7 @@ Application web d'une seule page qui génère des meubles paramétriques en cont
 | `css/app.css` | Styles, thème clair et sombre (`light-dark()`, variables CSS) | CSS |
 | `js/core.js` | Moteur : pièces, assemblages, dégagements d'angle, imbrication, DXF, ZIP. Aucun accès au DOM. Exporté pour Node en fin de fichier | **ES5** : `var`, `function`, pas de flèches ni de `const` (le fichier est aussi exécuté tel quel par les tests Node) |
 | `js/ui.js` | Interface, état, 3D, catalogue, Mes chutes, exports. Tout le fichier est dans un bloc `{ … }` | ES2020 : `const`, flèches, gabarits |
-| `tests/test.js` | 44 configurations de référence : collisions 3D, mortaises dans la matière, contours valides | Node ≥ 18 |
+| `tests/test.js` | 50 configurations de référence : collisions 3D, mortaises dans la matière, contours valides | Node ≥ 18 |
 | `tests/fuzz.js` | Mêmes contrôles sur des réglages tirés au hasard (`SEED`, `N`) | |
 | `tests/audit.js` | Audit des angles rentrants (dogbones) | |
 | `tools/bundle.js` | Version en un seul fichier dans `dist/` (ignoré par git) | |
@@ -43,7 +43,7 @@ Les tests renvoient un code de sortie non nul en cas d'échec (utilisé par la C
 - Usinages : `rects` (mortaises traversantes, dégagées automatiquement), `pockets` (`{x, y, w, h, depth, side}`, side = ±1 selon la face), `circ` (`{x, y, d, lay: 'T' | 'P' | 'I', depth}` : perçage traversant, poche, découpe intérieure), `curves` (découpes intérieures libres, **non** dégagées automatiquement : appeler `dogbone(points, rayon, true, S.dogStyle)` si une pièce s'y emboîte).
 - 3D : `role` (couleur : `caisse`, `plateau`, `facade`…), `ex` (vue éclatée), `anim` (portes, tiroirs), `rx: { a, y, z }` (pièce inclinée autour d'un axe parallèle à X, ex. lattes de chaise).
 
-**Assemblages** : `tabIv`, `tabsGaps`, `fingers` + `widen` (queues droites avec jeu), `slotU` / `slotV` (mortaise correspondant à un tenon), `addMort` (traversante ou borgne selon `S.blind`), `tenL(épaisseur reçue)` (longueur de tenon cohérente), `topMort` / `topTen` (mortaises forcées borgnes sous un plateau ou une assise). **Toujours** créer un tenon et sa mortaise avec les mêmes intervalles (`shift` pour changer de repère).
+**Assemblages** : `tabIv`, `tabsGaps`, `fingers` + `widen` (queues droites avec jeu), `slotU` / `slotV` (mortaise correspondant à un tenon), `addMort` (traversante ou borgne selon `S.blind`), `tenL(épaisseur reçue)` (longueur de tenon cohérente), `topMort` / `topTen` (mortaises forcées borgnes sous un plateau ou une assise), `keyLen` / `keyHole` / `addKey` (tenon traversant bloqué par une clé en coin, démontable), `splitRects` (répartir les usinages d'un plateau coupé en deux), `rrCorners` (rectangle à rayons différents par angle). **Toujours** créer un tenon et sa mortaise avec les mêmes intervalles (`shift` pour changer de repère).
 
 **Dégagements d'angle** (`dogbone`) : appliqués aux mortaises, aux poches et aux angles rentrants **droits** du contour extérieur. Si le rond ne tient pas (arête courte), repli en T le long de l'arête longue. Les angles non droits (formes décoratives) restent nets : si une pièce vient s'y appuyer, laisser un écart d'au moins le rayon de fraise.
 

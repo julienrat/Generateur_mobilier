@@ -1,12 +1,13 @@
 /* VOICE: atelier, précis, sans fioritures : un outil qu'on garde ouvert à côté de la CNC.
    IDEA: la fiche de débit punaisée au mur : maquette, calepinage des panneaux, nomenclature.
-   PICTURE: le meuble en contreplaqué en 3D sur un champ bleu cobalt, puis ses pièces posées sur les panneaux.
-   COLOUR and TYPE: cobalt (champ), bouleau (bois), orange signal (action, découpes intérieures) ; Barlow Condensed + Barlow.
+   PICTURE: le meuble en contreplaqué en 3D sur un fond d'atelier gris chaud, puis ses pièces posées sur les panneaux.
+   COLOUR and TYPE: anthracite (bandeau), gris chaud (scène), bouleau (bois), cobalt (actions), orange signal (découpes intérieures) ; Barlow Condensed + Barlow.
    LAYOUT: réglages à gauche, maquette au centre, fiche à droite ; sur mobile titre → maquette → réglages → fiche. */
 :root{color-scheme:light dark;
 --bg:light-dark(#ffffff,#121316);--panel:light-dark(#f4f3ef,#1a1b1f);--ink:light-dark(#15171c,#ecebe6);--mute:light-dark(#5b5e66,#a5a59f);
 --line:light-dark(#dedcd5,#2d2f35);--cob:light-dark(#2744d0,#172777);--cob2:light-dark(#1f37ad,#111d5c);--acc:light-dark(#f2540f,#ff7438);
---wood:#e6c890;--ply:#efe2c4;--field:light-dark(#ffffff,#202227);--link:light-dark(#2744d0,#9fb0ff)}
+--wood:#e6c890;--ply:#efe2c4;--field:light-dark(#ffffff,#202227);--link:light-dark(#2744d0,#9fb0ff);
+--top:light-dark(#212329,#0e0f12);--stage:light-dark(#e7e3db,#1b1c20);--stage-hi:light-dark(#f8f6f2,#2a2c31);--glass:light-dark(rgba(255,255,255,.78),rgba(38,40,46,.82))}
 :root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
 *{box-sizing:border-box;min-width:0}
 html{scroll-padding-top:72px}
@@ -15,7 +16,7 @@ button,input,select{font:inherit;color:inherit}
 h1,h2,h3{font-family:"Barlow Condensed",Barlow,sans-serif;font-weight:700;line-height:1.05;margin:0;text-wrap:balance}
 :focus-visible{outline:3px solid var(--acc);outline-offset:2px}
 /* en-tête */
-.top{background:var(--cob);color:#fff;padding:12px max(3vw,16px) 0;display:flex;flex-wrap:wrap;align-items:flex-end;gap:6px 32px}
+.top{background:var(--top);color:#fff;padding:12px max(3vw,16px) 0;display:flex;flex-wrap:wrap;align-items:flex-end;gap:6px 32px}
 .brand{display:flex;gap:12px;align-items:center;padding-bottom:6px}
 .brand svg{width:40px;height:40px}
 .brand svg{flex:none}
@@ -70,7 +71,7 @@ h1,h2,h3{font-family:"Barlow Condensed",Barlow,sans-serif;font-weight:700;line-h
 /* grille */
 .app{display:grid;grid-template-columns:330px minmax(0,1fr) 310px;grid-template-areas:"ctl stage sum"}
 .ctl{grid-area:ctl;padding:20px 20px 32px;border-right:1px solid var(--line)}
-.stage{grid-area:stage;background:var(--cob);color:#fff;position:sticky;top:0;height:100vh;display:flex;flex-direction:column}
+.stage{grid-area:stage;background:radial-gradient(120% 85% at 50% 32%,var(--stage-hi) 0%,var(--stage) 72%);color:var(--ink);position:sticky;top:0;height:100vh;display:flex;flex-direction:column}
 .sum{grid-area:sum;padding:20px 20px 32px;border-left:1px solid var(--line);background:var(--panel)}
 @media(max-width:1240px){.app{grid-template-columns:320px minmax(0,1fr);grid-template-areas:"ctl stage" "ctl sum"}.stage{position:relative;height:72vh;min-height:520px}.sum{border-left:0}}
 @media(max-width:860px){.app{grid-template-columns:minmax(0,1fr);grid-template-areas:"stage" "ctl" "sum"}.stage{height:64vh;min-height:380px}.ctl{border-right:0}.brand{padding-bottom:8px}}
@@ -146,8 +147,8 @@ details.mcard>summary::after{content:"";width:8px;height:8px;border-right:2px so
 details.mcard[open]>summary::after{transform:rotate(-135deg);margin-bottom:-4px}
 details.mcard>:not(summary){margin-left:10px;margin-right:10px}
 details.mcard[open]{padding-bottom:10px}
-.pbtn{display:none;align-items:center;justify-content:center;width:44px;height:44px;border:0;border-radius:10px;background:rgba(255,255,255,.14);color:#fff;cursor:pointer;flex:none}
-.pbtn:hover{background:rgba(255,255,255,.26)}
+.pbtn{display:none;align-items:center;justify-content:center;width:44px;height:44px;border:1px solid var(--line);border-radius:10px;background:var(--glass);color:var(--ink);cursor:pointer;flex:none}
+.pbtn:hover{border-color:var(--ink)}
 .pbtn svg{width:22px;height:22px}
 .stl{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 @media(min-width:1241px){
@@ -181,9 +182,9 @@ input[type=range]{width:100%;height:28px;margin:4px 0 0;accent-color:var(--cob);
 .f select{width:100%;margin-top:6px}
 /* scène */
 .stbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding:12px 16px}
-.seg{display:flex;background:rgba(255,255,255,.14);border-radius:10px;padding:3px}
-.seg button{min-height:40px;border:0;background:transparent;color:#fff;padding:0 16px;border-radius:8px;cursor:pointer;font-weight:600}
-.seg button[aria-selected=true]{background:#fff;color:#15171c}
+.seg{display:flex;background:var(--glass);border:1px solid var(--line);border-radius:10px;padding:3px}
+.seg button{min-height:40px;border:0;background:transparent;color:var(--ink);padding:0 16px;border-radius:8px;cursor:pointer;font-weight:600}
+.seg button[aria-selected=true]{background:var(--ink);color:var(--bg)}
 .seg small{opacity:.7;font-weight:500}
 .dims{font-family:"Barlow Condensed",sans-serif;font-size:22px;font-weight:600;white-space:nowrap}
 .view{flex:1;position:relative;min-height:0}
@@ -194,13 +195,11 @@ input[type=range]{width:100%;height:28px;margin:4px 0 0;accent-color:var(--cob);
 .no3d{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:24px;margin:0;opacity:.9}
 .tools{position:absolute;left:12px;right:12px;top:4px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;pointer-events:none}
 .tools>*{pointer-events:auto}
-.tbtn{min-height:44px;padding:0 14px;border-radius:10px;border:0;background:rgba(10,16,60,.55);color:#fff;cursor:pointer;font-weight:600;backdrop-filter:blur(6px)}
-.tbtn[aria-pressed=true]{background:#fff;color:#15171c}
-.exp{display:flex;align-items:center;gap:8px;min-height:44px;padding:0 12px;border-radius:10px;background:rgba(10,16,60,.55);backdrop-filter:blur(6px);font-weight:600}
-.exp input{width:110px;accent-color:#fff}
-.tints{display:flex;gap:6px;padding:6px 8px;border-radius:10px;background:rgba(10,16,60,.55);backdrop-filter:blur(6px)}
-.tints button{width:32px;height:32px;border-radius:50%;border:2px solid rgba(255,255,255,.4);cursor:pointer;padding:0}
-.tints button[aria-pressed=true]{border-color:#fff;box-shadow:0 0 0 2px var(--acc)}
+.tbtn{min-height:44px;padding:0 14px;border-radius:10px;border:1px solid var(--line);background:var(--glass);color:var(--ink);cursor:pointer;font-weight:600;backdrop-filter:blur(6px)}
+.tbtn:hover{border-color:var(--ink)}
+.tbtn[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.exp{display:flex;align-items:center;gap:8px;min-height:44px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:var(--glass);backdrop-filter:blur(6px);font-weight:600}
+.exp input{width:110px;accent-color:var(--acc)}
 .hint{position:absolute;bottom:10px;left:16px;margin:0;font-size:13px;opacity:.75;pointer-events:none}
 .scrollv{position:absolute;inset:0;overflow:auto;padding:4px 16px 20px}
 .legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:14px;margin:0 0 12px;background:#f6ecd6;color:#1b1a17;border-radius:8px;padding:8px 12px}
@@ -208,7 +207,7 @@ input[type=range]{width:100%;height:28px;margin:4px 0 0;accent-color:var(--cob);
 .legend i{display:inline-block;width:22px;border-top:3px solid}
 .sheet{margin:0 0 22px}
 .sheet figcaption{font-size:15px;margin:0 0 6px}
-.sheet svg{display:block;width:100%;height:auto;border-radius:4px;box-shadow:0 10px 30px rgba(0,0,20,.35)}
+.sheet svg{display:block;width:100%;height:auto;border-radius:4px;box-shadow:0 8px 24px rgba(40,30,10,.18)}
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
 .card{background:var(--bg);color:var(--ink);border-radius:10px;overflow:hidden;display:flex;flex-direction:column}
 .card .th{background:var(--ply);aspect-ratio:4/3;display:grid;place-items:center;padding:10px}

@@ -49,6 +49,14 @@ const cases = [
   ['casier', { W: 1300, H: 750, D: 400, nx: 4, ny: 2, hp: 0, back: false, portes: 'bas', handle: 'percage', gapF: 3 }],
   ['chaise', { Hs: 450, W: 440, D: 480, Hb: 820, inc: 10, nl: 3, trav: true, yst: 150 }],
   ['chaise', { Hs: 650, W: 420, D: 500, Hb: 980, inc: 8, nl: 2, trav: true, yst: 300 }],
+  ['table', { L: 4400, P: 1180, H: 738, forme: 'stade', R: 40, pied: 'A', wt: 700, ov: 450, trav: 'cle', ytr: 160, rail: true, fix: 'borgne', cable: true, nP: 3 }],
+  ['table', { L: 2400, P: 950, H: 738, forme: 'rect', R: 40, pied: 'plaque', wt: 520, ov: 300, trav: 'vis', ytr: 150, rail: true, fix: 'traversant', cable: true, nP: 3 }],
+  ['table', { L: 2900, P: 400, H: 450, forme: 'stade', R: 40, pied: 'A', wt: 1000, ov: 240, trav: 'aucune', ytr: 120, rail: true, fix: 'borgne', cable: false, nP: 3 }],
+  ['stand', { L: 1200, P: 800, h1: 740, h2: 910, h3: 1090, niv: 1, ytr: 150 }],
+  ['stand', { L: 1600, P: 800, h1: 720, h2: 900, h3: 1100, niv: 3, ytr: 150 }],
+  ['cloison', { W: 1000, H: 1800, D: 600, roul: true, poig: true }],
+  ['cloison', { W: 1400, H: 1500, D: 500, roul: false, poig: false }],
+  ['casier', { W: 1000, H: 800, D: 400, nx: 3, ny: 2, hp: 60, back: true, portes: 'aucune', handle: 'decoupe', gapF: 3, jard: true, hj: 200 }],
 ];
 const dens = raw => C.arcPts(raw.map(q => ({ x: q[0], y: q[1], b: q[2] || 0 })));
 function pip(pt, poly) { let c = false; for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) { const a = poly[i], b = poly[j]; if ((a[1] > pt[1]) !== (b[1] > pt[1]) && pt[0] < ((b[0] - a[0]) * (pt[1] - a[1])) / (b[1] - a[1]) + a[0]) c = !c; } return c; }

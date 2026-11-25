@@ -6,8 +6,8 @@ Application web d'une seule page, sans serveur ni compilation, pour concevoir de
 
 ## Ce que fait l'application
 
-- **Catalogue** de 29 meubles en 4 familles (tables et bureaux, assises, rangement, atelier), avec un aperçu 3D qui tourne au survol.
-- **16 modèles paramétriques** : établi modulaire, caisson à tiroirs, placard, étagère, établi sur pieds, base roulante, tréteaux, caisses empilables, tabouret, panneau mural à fentes, chariot à chutes, porte-outils, table / bureau / banc, table à pied central, étagère à casiers, chaise.
+- **Catalogue** de 38 meubles en 4 familles (tables et bureaux, assises, rangement et cloisons, atelier), avec un aperçu 3D qui tourne au survol.
+- **18 modèles paramétriques** : établi modulaire, caisson à tiroirs, placard, étagère, établi sur pieds, base roulante, tréteaux, caisses empilables, tabouret, panneau mural à fentes, chariot à chutes, porte-outils, table / bureau / banc (jusqu'à 4,8 m, 3 piètements), table à pied central, étagère à casiers (option jardinière), chaise, bureau debout réglable, cloison mobile.
 - **Assemblages bois** plutôt que quincaillerie : tenons traversants ou borgnes, mi-bois, queues droites, clés de serrage, ergots d'empilage. Les angles intérieurs sont dégagés pour la fraise (dogbones ronds, ou en T quand le rond ne tient pas).
 - **Imbrication** automatique des pièces sur des panneaux neufs (3 épaisseurs : structure, fine, fonds et dos) ou sur vos chutes.
 - **Mes chutes** : vous saisissez vos plaques de récupération, l'application propose les meubles qu'elles permettent de fabriquer.

@@ -286,13 +286,74 @@ function genTiroirs(p, out, deco, info) {
   baseHw(p, info);
   return k;
 }
+/* ---------- charnière à pivot en bois, sans quincaillerie (dans l'esprit des casiers Opendesk) ----------
+   La porte, encastrée et en léger retrait (dr), porte en haut et en bas un pivot rectangulaire (épaisseur × t / 2) taillé
+   dans son contour, à PIV_E du chant. Il tourne dans un logement rond de Ø = diagonale du pivot + jeu, qui reste dans la
+   matière du panneau. En bas, logement borgne : la porte repose sur le bout du pivot. En haut, logement plus profond
+   (ou traversant) et jeu plus grand (gT) : on soulève la porte pour la dégonder. Une butée collée sous le panneau du haut,
+   derrière le chant libre, arrête la porte fermée. */
+var PIV_E = 10;
+function pivot(t) {
+  var w = Math.round(t / 2), ax = PIV_E + w / 2, r = Math.sqrt(ax * ax + t * t / 4), d = Math.ceil((Math.sqrt(t * t + w * w) + 0.8) * 2) / 2;
+  var pb = clamp(Math.floor((t - S.skin - 0.5) / 2), 3, 5);
+  return { w: w, ax: ax, d: d, gH: Math.ceil((r - ax + 0.8) * 2) / 2, dr: Math.ceil((d / 2 - t / 2 + 1) * 2) / 2, pb: pb, gB: 1.5, gT: pb + 1.5 };
+}
+/* panneau horizontal dont la face supérieure (top = false) ou inférieure (top = true) est en y et qui couvre (x, z) */
+function panelAt(out, x, y, z, top) {
+  for (var i = 0; i < out.length; i++) {
+    var b = out[i].box;
+    if (b[4] - b[1] > Math.min(b[3] - b[0], b[5] - b[2])) continue;
+    if (Math.abs((top ? b[1] : b[4]) - y) < 0.01 && x > b[0] && x < b[3] && z > b[2] && z < b[5]) return out[i];
+  }
+  return null;
+}
+/* porte sur pivots : o = { side 'L' | 'R', x0, wd, yB (dessus du panneau bas), yT (dessous du panneau haut), z1 (face avant du
+   meuble), name, ex, curves, circ }. Renvoie la porte, son axe et de quoi percer les panneaux et poser la butée. */
+function pivotDoor(o) {
+  var t = S.t, pv = pivot(t), wd = o.wd, hd = o.yT - o.yB - pv.gB - pv.gT, zf = o.z1 - pv.dr;
+  var iv = o.side === 'L' ? [[PIV_E, PIV_E + pv.w]] : [[wd - PIV_E - pv.w, wd - PIV_E]];
+  var px = o.side === 'L' ? o.x0 + pv.ax : o.x0 + wd - pv.ax, pz = zf - t / 2, an = { k: 'hinge', side: o.side, px: px, pz: pz };
+  var door = part(o.ref || 'porte', o.name || 'Porte', wd, hd, { e: { b: T(iv, pv.gB + pv.pb), t: T(iv, pv.gT + pv.pb) }, circ: o.circ || [], curves: o.curves || [], role: 'facade', anim: an, box: [o.x0, o.yB + pv.gB, zf - t, o.x0 + wd, o.yB + pv.gB + hd, zf], ex: o.ex });
+  return { door: door, an: an, hd: hd, y0: o.yB + pv.gB, px: px, pz: pz, pv: pv, zf: zf };
+}
+/* logements des pivots dans les panneaux bas et haut ; through : traverser le panneau haut (s'il porte déjà, sur sa face
+   supérieure, le pivot bas d'une autre porte). Renvoie false si un panneau manque. */
+function pivotHoles(out, d, o, through) {
+  var t = S.t, pv = d.pv, bot = panelAt(out, d.px, o.yB, d.pz, false), top = panelAt(out, d.px, o.yT, d.pz, true);
+  if (!bot || !top) return false;
+  bot.circ.push({ x: d.px - bot.box[0], y: d.pz - bot.box[2], d: pv.d, lay: 'P', depth: pv.pb, side: 1 });
+  var tt = top.box[4] - top.box[1];
+  /* un logement borgne par-dessous ne doit pas s'ajouter à des usinages de la face supérieure (avant-trous, poches) */
+  if (top.circ.some(function (c) { return c.lay === 'P' && !(c.side < 0); }) || (top.pockets || []).some(function (q) { return q.side > 0; })) through = true;
+  if (through) top.circ.push({ x: d.px - top.box[0], y: d.pz - top.box[2], d: pv.d, lay: 'T' });
+  else top.circ.push({ x: d.px - top.box[0], y: d.pz - top.box[2], d: pv.d, lay: 'P', depth: Math.round((tt - S.skin) * 10) / 10, side: -1 });
+  return true;
+}
+/* butée collée sous le panneau du haut, derrière le chant libre de la porte */
+function doorStop(out, d, o, sc) {
+  var t = S.t, wb = Math.min(42, o.wd * 0.3), xb = o.side === 'L' ? o.x0 + o.wd - 8 - wb : o.x0 + 8, z1 = d.zf - t - 0.3;
+  out.push(part('butee', 'Butée de porte', wb, 22, { box: [xb, o.yT - t, z1 - 22, xb + wb, o.yT, z1], ex: [0, sc * 0.1, -sc * 0.15] }));
+}
 function doorHinges(hd) { var c = hd <= 900 ? 2 : hd <= 1600 ? 3 : 4, ys = []; for (var i = 0; i < c; i++) ys.push(100 + ((hd - 200) * i) / (c - 1)); return ys; }
 function genPlacard(p, out, deco, info) {
-  var t = S.t, g = p.gapF, y0 = p.base === 'plinth' ? p.hp : 0, yi0 = y0 + t, yi1 = p.H - t, nf = p.nf, fixed = [], i;
-  var space = (yi1 - yi0 - nf * t) / (nf + 1), dz = p.D * 0.75 + 80;
-  for (i = 1; i <= nf; i++) fixed.push({ y: yi0 + i * space + (i - 1) * t, rec: 0, ref: 'tabF', name: 'Tablette fixe' });
+  var t = S.t, g = p.gapF, y0 = p.base === 'plinth' ? p.hp : 0, yi0 = y0 + t, yi1 = p.H - t, nf = p.nf, fixed = [], i, wood = p.charn !== 'metal';
+  var space = (yi1 - yi0 - nf * t) / (nf + 1), dz = p.D * 0.75 + 80, pv = pivot(t), rec = wood ? t + pv.dr + 2 : 0;
+  for (i = 1; i <= nf; i++) fixed.push({ y: yi0 + i * space + (i - 1) * t, rec: rec, ref: 'tabF', name: 'Tablette fixe' });
   var nd = p.nd, wd = (p.W - g * nd) / nd, hd = p.H - y0 - g, yd = y0 + g / 2, ys = hd > 260 ? doorHinges(hd) : [hd * 0.25, hd * 0.75], hinges = [], doors = [];
   if (hd < 200) { info.warn.push('Placard trop bas (' + Math.round(p.H) + ' mm) pour des portes à charnières : laissé ouvert, sans porte.'); nd = 0; }
+  var pivD = [];
+  /* portes encastrées sur pivots en bois : entre les joues, le dessous et le dessus */
+  if (wood) for (i = 0; i < nd; i++) {
+    var sideW = nd === 1 ? p.sens : i === 0 ? 'L' : 'R', Wi = p.W - 2 * t, gf = Math.max(1.5, g / 2);
+    var wdW = nd === 1 ? Wi - pv.gH - gf : Wi / 2 - pv.gH - g / 2, xW = sideW === 'L' ? t + pv.gH : nd === 1 ? t + gf : t + Wi / 2 + g / 2;
+    var oW = { side: sideW, x0: xW, wd: wdW, yB: yi0, yT: yi1, z1: p.D, name: 'Porte (pivots ' + (sideW === 'L' ? 'à gauche)' : 'à droite)'), ex: [0, 0, dz * 1.5] };
+    var cW = [], kW = []; oW.curves = cW; oW.circ = kW;
+    var hpW = handleOn(p.handle, wdW, yi1 - yi0 - pv.gB - pv.gT, cW, kW, { side: sideW, yc: 1000 - yi0 });
+    var dW = pivotDoor(oW);
+    hwHandle(deco, hpW, xW, dW.y0, dW.zf, { anim: dW.an, ex: oW.ex });
+    pivD.push([dW, oW]); doors.push(dW.door);
+  }
+  if (wood) nd = 0;
   for (i = 0; i < nd; i++) {
     var side = nd === 1 ? p.sens : i === 0 ? 'L' : 'R', x0 = g / 2 + i * (wd + g), cx = side === 'L' ? 22.5 : wd - 22.5;
     var an = { k: 'hinge', side: side, px: side === 'L' ? x0 : x0 + wd, pz: p.D + t }, ho = { anim: an, ex: [0, 0, dz * 1.5] };
@@ -312,17 +373,21 @@ function genPlacard(p, out, deco, info) {
   }
   var k = carcass({ W: p.W, H: p.H, D: p.D, base: p.base, hp: p.hp, sb: 40, back: p.back, top: p.top, wS: p.wS, fixed: fixed, pins: p.na > 0, hinges: hinges, plA: p.plA, plB: p.plB, plD: p.plD, cH: p.cH }, out, deco, info);
   doors.forEach(function (d) { out.push(d); });
+  /* dans l'établi modulaire, le dessus des caissons reçoit ensuite des avant-trous : logement du haut traversant */
+  pivD.forEach(function (q) { if (!pivotHoles(out, q[0], q[1], !!info.inCompo)) info.warn.push('Pivots de porte : panneau du haut ou du bas introuvable.'); doorStop(out, q[0], q[1], dz); });
+  if (pivD.length) info.hw.push(['Charnières : pivots en bois taillés dans les portes, rien à acheter ; butées collées', pivD.length, 'hinge']);
   var comp = [];
   for (i = 0; i <= nf; i++) comp.push([yi0 + i * (space + t), yi0 + i * (space + t) + space]);
   for (i = 0; i < p.na; i++) {
     var c = comp[i % comp.length], cnt = Math.ceil((p.na - (i % comp.length)) / comp.length), j = Math.floor(i / comp.length), yy = c[0] + ((c[1] - c[0]) * (j + 1)) / (cnt + 1) - t / 2;
     var py = Math.round((yy - 2.5 - (y0 + t + 96)) / 32) * 32 + y0 + t + 96; yy = py + 2.5;
-    out.push(part('tabM', 'Tablette mobile', k.Wi - 2, p.D - k.zb - 12, { box: [t + 1, yy, k.zb, p.W - t - 1, yy + t, p.D - 12], ex: [0, 0, dz * 0.9] }));
+    var zM = p.D - 12 - (pivD.length ? t + pv.dr : 0);
+    out.push(part('tabM', 'Tablette mobile', k.Wi - 2, zM - k.zb, { box: [t + 1, yy, k.zb, p.W - t - 1, yy + t, zM], ex: [0, 0, dz * 0.9] }));
     [k.zb + 37, p.D - 37].forEach(function (z) { [t + 5, p.W - t - 5].forEach(function (x) { hwCyl(deco, [x, py, z], 2.5, 10, 'x', 'metal', { ex: [0, 0, dz * 0.9] }); }); });
   }
   if (nd) info.hw.push(['Charnières invisibles Ø 35 + embases (système 32)', ys.length * nd, 'hinge']);
   if (p.na) info.hw.push(['Taquets Ø 5', p.na * 4, 'pin']);
-  if (p.handle === 'percage' && nd) info.hw.push(['Poignées barre entraxe 128 mm', nd, 'handle']);
+  if (p.handle === 'percage' && (nd || pivD.length)) info.hw.push(['Poignées barre entraxe 128 mm', nd || pivD.length, 'handle']);
   baseHw(p, info);
   return k;
 }
@@ -525,7 +590,7 @@ function genCompo(p, out, deco, info) {
       var W = col.c * cw, hs = stackHeights(col, H), y = 0;
       if (!col.s.length) info.warn.push('Colonne ' + (ri ? 'B' : 'A') + (ci + 1) + ' vide : le plateau y porte entre les colonnes voisines.');
       col.s.forEach(function (m, si) {
-        var h = hs[si], loc = [], ldeco = [], li = { warn: [], hw: [], lift: 0 }, isTop = si === col.s.length - 1;
+        var h = hs[si], loc = [], ldeco = [], li = { warn: [], hw: [], lift: 0, inCompo: true }, isTop = si === col.s.length - 1;
         var topMode = isTop && !p.plateau ? 'plein' : p.top;
         var mp = { W: W, H: h, D: cd, base: 'none', back: true, gapF: 3, handle: p.handle, hp: 80, plA: 60, plB: 45, plD: 6.5, cH: 100, top: topMode, wS: p.wS };
         if (m.t === 'tiroirs') Object.assign(mp, { n: clamp(m.n, 1, 7), dist: p.dist, slides: p.slides });
@@ -1019,6 +1084,7 @@ function genTable(p, out, deco, info) {
   var t = S.t, J = S.jeu, L = p.L, P = p.P, H = p.H, Hl = H - t, sc = Math.max(L, P) * 0.28 + 80, A = p.pied !== 'plaque';
   var mg = S.margin != null ? S.margin : 15, Lmax = Math.max(S.sheetW || 2500, S.sheetH || 1250) - 2 * mg - 2, Pmax = Math.min(S.sheetW || 2500, S.sheetH || 1250) - 2 * mg - 2;
   var split = L > Lmax, nP = p.nP === 3 || split ? 3 : 2;
+  info.split = split;
   var blind = p.fix !== 'traversant' || split, tlT = topTen(t, blind), seat = H <= 560 && P <= 480;
   if (split && p.fix === 'traversant') info.warn.push('Plateau en deux parties : tenons du plateau cachés (mortaises borgnes).');
   if (split && p.nP !== 3) info.warn.push('Plateau plus long qu’un panneau (' + Math.round(Lmax) + ' mm) : coupé en deux, avec un piètement central sous la jonction.');
@@ -1050,33 +1116,40 @@ function genTable(p, out, deco, info) {
     }
   }
   var tops = tabsGaps(wt, gR, 25), topsM = gK.length ? tabsGaps(wt, gR.concat(gK), 25) : tops;
-  var profOf = function (tp) { return { 0: ha >= 20 ? [[fw, Wb - fw, -ha, 'arc']] : [], 2: tp.map(function (a) { return [a[0], a[1], tlT]; }) }; };
+  /* plateau coupé : les tenons du piètement central chevauchent la jonction ; deux demi-mortaises de (t + jeu) / 2, peu
+     profondes pour garder de la matière au bord de chaque moitié */
+  var tlM = split ? Math.round(t / 2) : tlT;
+  if (split && S.toolI > (t + J) / 2 - 0.3) info.warn.push('Fraise des mortaises (Ø ' + S.toolI + ') trop grosse pour les demi-mortaises de la jonction du plateau (' + Math.round((t + J) / 2 * 10) / 10 + ' mm).');
+  var profOf = function (tp, tl) { return { 0: ha >= 20 ? [[fw, Wb - fw, -ha, 'arc']] : [], 2: tp.map(function (a) { return [a[0], a[1], tl]; }) }; };
   var halfW = function (v) { return Wb / 2 - ((Wb - wt) / 2) * (v / Hl); };
   var v0 = (hasT ? ytr + hs : ha) + 55, v1 = (hr ? Hl - hr : Hl) - 55, wh = halfW(v1) - 55, win = A && v1 - v0 >= 100 && wh >= 40;
-  var tenS = [[20, hs - 20]], tenR = [[16, hr - 16]], half = (t - 1) / 2;
+  /* au piètement central, les tenons des deux travées se superposent dans la même mortaise : moitié haute pour la travée
+     de gauche, moitié basse pour celle de droite, chacun sur toute l'épaisseur, à sec (la table reste démontable) */
+  var tenS = [[20, hs - 20]], tenR = [[16, hr - 16]], tm1 = t - 0.5;
+  var hiS = [[hs / 2 + 0.5, hs - 20]], loS = [[20, hs / 2 - 0.5]], hiR = [[hr / 2 + 0.5, hr - 16]], loR = [[16, hr / 2 - 0.5]];
   xsP.forEach(function (x, i) {
     var mid = i > 0 && i < last;
-    var e = part('pied', (A ? 'Piètement en A' : 'Piètement plein') + (mid ? ' central' : ''), Wb, Hl, { shape: shapeE(V, profOf(mid ? topsM : tops)), curves: win ? [roundRect(cu - wh, v0, cu + wh, v1, 35)] : [], box: [x, 0, zi, x + t, Hl, P - zi], ex: [i === 0 ? -sc * 0.8 : i === last ? sc * 0.8 : 0, mid ? sc * 0.25 : 0, mid ? sc * 0.4 : 0] });
+    var e = part('pied', (A ? 'Piètement en A' : 'Piètement plein') + (mid ? ' central' : ''), Wb, Hl, { shape: shapeE(V, mid ? profOf(topsM, tlM) : profOf(tops, tlT)), curves: win ? [roundRect(cu - wh, v0, cu + wh, v1, 35)] : [], box: [x, 0, zi, x + t, Hl, P - zi], ex: [i === 0 ? -sc * 0.8 : i === last ? sc * 0.8 : 0, mid ? sc * 0.25 : 0, mid ? sc * 0.4 : 0] });
     if (hasT) { var ms = slotV(shift(tenS, ytr), cu, t); if (key || mid) e.rects.push.apply(e.rects, ms); else addMort(e, ms, t, i ? -1 : 1); }
     if (hr) { var mr = slotV(shift(tenR, Hl - hr), cu, t); if (mid) e.rects.push.apply(e.rects, mr); else addMort(e, mr, t, i ? -1 : 1); }
     out.push(e);
   });
   var tm = [];
-  xsP.forEach(function (x, i) { tm = tm.concat(slotV((i > 0 && i < last ? topsM : tops).map(function (a) { return [zi + cu + wt / 2 - a[1], zi + cu + wt / 2 - a[0]]; }), x + t / 2, t)); });
+  xsP.forEach(function (x, i) { var mid = i > 0 && i < last; tm = tm.concat(slotV((mid ? topsM : tops).map(function (a) { return [zi + cu + wt / 2 - a[1], zi + cu + wt / 2 - a[0]]; }), x + t / 2, t).map(function (r) { return mid ? Object.assign(r, { mid: 1 }) : r; })); });
   /* une traverse basse et un longeron par travée ; au piètement central, deux demi-tenons collés dans la même mortaise */
   for (var k = 0; k < last; k++) {
     var xa = xsP[k] + t, xb = xsP[k + 1], ls = xb - xa, kl = key && k === 0, kr = key && k === last - 1;
     if (hasT) {
-      var tlL = k === 0 ? (key ? keyLen(t) : tenL(t)) : half, tlR = k === last - 1 ? (key ? keyLen(t) : tenL(t)) : half, holes = [];
+      var tlL = k === 0 ? (key ? keyLen(t) : tenL(t)) : tm1, tlR = k === last - 1 ? (key ? keyLen(t) : tenL(t)) : tm1, holes = [];
       if (kl) holes.push(keyHole('L', ls, t, hs / 2));
       if (kr) holes.push(keyHole('R', ls, t, hs / 2));
-      out.push(part('trav', 'Traverse basse', ls, hs, { e: { l: T(tenS, tlL), r: T(tenS, tlR), b: ls > 400 ? Mx([[110, ls - 110, -Math.min(hs * 0.3, 40), 'arc']]) : null }, rects: holes, box: [xa, ytr, zc - t / 2, xb, ytr + hs, zc + t / 2], ex: [0, -sc * 0.35, 0] }));
+      out.push(part('trav', 'Traverse basse', ls, hs, { e: { l: T(k === 0 ? tenS : loS, tlL), r: T(k === last - 1 ? tenS : hiS, tlR), b: ls > 400 ? Mx([[110, ls - 110, -Math.min(hs * 0.3, 40), 'arc']]) : null }, rects: holes, box: [xa, ytr, zc - t / 2, xb, ytr + hs, zc + t / 2], ex: [0, -sc * 0.35, 0] }));
       if (kl) addKey(out, 'L', xsP[0], ytr + hs / 2, zc, t, 1, sc);
       if (kr) addKey(out, 'R', xsP[last] + t, ytr + hs / 2, zc, t, 1, sc);
     }
     if (hr) {
-      var ivRt = tabIv(ls, 60), rl = k === 0 ? tenL(t) : half, rr = k === last - 1 ? tenL(t) : half;
-      out.push(part('longeron', 'Longeron sous plateau', ls, hr, { e: { l: T(tenR, rl), r: T(tenR, rr), t: T(ivRt, tlT), b: ls > 500 ? Mx([[150, ls - 150, -Math.min(hr * 0.35, 30), 'arc']]) : null }, box: [xa, Hl - hr, zc - t / 2, xb, Hl, zc + t / 2], ex: [0, sc * 0.4, 0] }));
+      var ivRt = tabIv(ls, 60), rl = k === 0 ? tenL(t) : tm1, rr = k === last - 1 ? tenL(t) : tm1;
+      out.push(part('longeron', 'Longeron sous plateau', ls, hr, { e: { l: T(k === 0 ? tenR : loR, rl), r: T(k === last - 1 ? tenR : hiR, rr), t: T(ivRt, tlT), b: ls > 500 ? Mx([[150, ls - 150, -Math.min(hr * 0.35, 30), 'arc']]) : null }, box: [xa, Hl - hr, zc - t / 2, xb, Hl, zc + t / 2], ex: [0, sc * 0.4, 0] }));
       tm = tm.concat(slotU(shift(ivRt, xa), zc, t));
     }
   }
@@ -1094,22 +1167,24 @@ function genTable(p, out, deco, info) {
     out.push(top);
   } else {
     /* plateau en deux moitiés jointes au-dessus du piètement central, clés de jonction collées dans des poches dessous */
-    var xm = L / 2, tk = Math.min(S.tD, t - 6), kL = 160;
+    /* clés en panneau fin (tD ou tF) assez mince pour laisser de la matière sous la poche */
+    var xm = L / 2, kL = 160, tks = [S.tD, S.tF].filter(function (v) { return v && v <= t - S.skin - 3; }), tk = tks.length ? Math.max.apply(null, tks) : Math.min(S.tD, S.tF);
+    if (!tks.length) info.warn.push('Clés de jonction : aucune épaisseur fine n’est assez mince pour ce plateau (' + tk + ' mm) ; choisissez un panneau fin plus mince.');
     zks.forEach(function (z) { tm.push({ x: xm - kL / 2 - J / 2, y: z - kW / 2 - J / 2, w: kL + J, h: kW + J, key: 1 }); });
     var sp = splitRects(tm, xm), nc2 = 0;
     [0, 1].forEach(function (h) {
       var hp = part('plateau', 'Plateau (moitié ' + (h ? 'droite' : 'gauche') + ')', xm, P, { shape: rrCorners(xm, P, h ? [0, Rr, Rr, 0] : [Rr, 0, 0, Rr]), role: 'plateau', box: [h * xm, Hl, 0, (h + 1) * xm, H, P], ex: [h ? sc * 0.3 : -sc * 0.3, sc * 0.9, 0] });
-      sp[h].forEach(function (r) { hp.pockets.push({ x: r.x, y: r.y, w: r.w, h: r.h, depth: r.key ? tk + 0.2 : Math.round((t - S.skin) * 10) / 10, side: -1 }); });
+      sp[h].forEach(function (r) { hp.pockets.push({ x: r.x, y: r.y, w: r.w, h: r.h, depth: r.key ? Math.min(tk + 0.2, t - S.skin) : r.mid ? tlM + 0.5 : Math.round((t - S.skin) * 10) / 10, side: -1 }); });
       circs.forEach(function (c) { var u = c.x - h * xm; if (u > 0 && u < xm && clear(hp, u, c.y, 30, 12)) { hp.circ.push({ x: u, y: c.y, d: c.d, lay: c.lay }); nc2++; } });
       out.push(hp);
     });
     zks.forEach(function (z) { out.push(part('clej', 'Clé de jonction', kL, kW, { th: tk, box: [xm - kL / 2, Hl, z - kW / 2, xm + kL / 2, Hl + tk, z + kW / 2], ex: [0, sc * 0.55, 0] })); });
-    info.hw.push(['Clés de jonction du plateau : coller dans les poches, serrer les deux moitiés', zks.length, 'glue']);
+    info.hw.push(['Clés de jonction : collées dans une seule moitié du plateau, la table se démonte en deux', zks.length, 'glue'], ['Vis 4 × 30 en biais, plateau sur les tenons des piètements', 4 * nP, 'screw']);
     if (nc2) info.hw.push(['Passe-câbles Ø 60 (bouchons du commerce)', nc2, 'screw']);
   }
   var span = xsP[1] - xsP[0] - t;
   if (!hr && span > 1200) info.warn.push('Portée de ' + Math.round(span) + ' mm sans longeron : le plateau risque de fléchir.');
-  if (span > 2000) info.warn.push('Portée de ' + Math.round(span) + ' mm entre piètements : passez à 3 piètements.');
+  if (span > 2000) info.warn.push('Portée de ' + Math.round(span) + ' mm entre piètements : ' + (nP === 3 ? 'raccourcissez la table ou augmentez le débord aux extrémités.' : 'passez à 3 piètements.'));
   if (!hr && !hasT) info.warn.push('Sans traverse ni longeron, la table n’est pas contreventée dans sa longueur.');
   if (Wb < H * 0.45) info.warn.push('Piètement étroit pour cette hauteur : risque de basculement.');
   info.hw.push([blind && topBlind(t, true) ? 'Colle + vis 4 × 40 en biais aux tenons du plateau (mortaises borgnes dessous)' : 'Colle aux tenons traversants du plateau, arasés au ponçage', 1, 'glue'], ['Patins sous les pieds', 2 * nP, 'foot']);
@@ -1156,6 +1231,8 @@ function genCasier(p, out, deco, info) {
   for (k = 1; k < ny; k++) ys.push(yb1 + k * ch + (k - 1) * t);
   if (cw < 140 || ch < 120) info.warn.push('Cases étroites (' + Math.round(cw) + ' × ' + Math.round(ch) + ' mm).');
   var fD = fingers(0, D), tl = tenL(t), ivV = tabIv(Dd, 30), ivD = tabIv(D, 40);
+  /* sous une jardinière, mortaises du dessus forcément borgnes : pas de bois de bout dans la terre */
+  var jT = p.jard ? topTen(t, true) : 0, topM = function (rects) { if (p.jard) topMort(top, rects, true); else addMort(top, rects, t, -1); };
   var sE = { t: N(widen(fD.od, 0, D), t) };
   if (!raised) sE.b = N(widen(fD.od, 0, D), t);
   else { var fwS = 60, haS = Math.min(hp - 15, (D - 2 * fwS) * 0.3); if (haS >= 15) sE.b = Mx([[fwS, D - fwS, -haS, 'arc']]); }
@@ -1169,17 +1246,17 @@ function genCasier(p, out, deco, info) {
   out.push(top, bot);
   if (p.back) {
     var ivBH = tabIv(Hi, 40), ivBW = tabIv(Wi, 50), tlB = tenL(t);
-    out.push(part('dos', 'Dos', Wi, Hi, { th: tB, e: { l: T(ivBH, tlB), r: T(ivBH, tlB), t: T(ivBW, tlB), b: T(ivBW, tlB) }, box: [t, yb1, ib, W - t, yT0, ib + tB], ex: [0, 0, -sc] }));
+    out.push(part('dos', 'Dos', Wi, Hi, { th: tB, e: { l: T(ivBH, tlB), r: T(ivBH, tlB), t: T(ivBW, jT || tlB), b: T(ivBW, tlB) }, box: [t, yb1, ib, W - t, yT0, ib + tB], ex: [0, 0, -sc] }));
     sides.forEach(function (sd, i) { addMort(sd, slotV(shift(ivBH, yb1), ib + tB / 2, tB), t, i ? -1 : 1); });
-    addMort(top, slotU(shift(ivBW, t), ib + tB / 2, tB), t, -1);
+    topM(slotU(shift(ivBW, t), ib + tB / 2, tB));
     addMort(bot, slotU(shift(ivBW, t - bx0), ib + tB / 2, tB), t, 1);
   }
   /* montants (entaillés par l'avant) et tablettes (entaillées par l'arrière) se croisent à mi-bois */
   xs.forEach(function (x) {
-    var eD = { b: T(ivV, tl), t: T(ivV, tl) };
+    var eD = { b: T(ivV, tl), t: T(ivV, jT || tl) };
     if (ys.length) eD.r = N(widen(ys.map(function (y) { return [y - yb1, y - yb1 + t]; }), 0, Hi), Dd / 2);
     out.push(part('mont', 'Montant', Dd, Hi, { e: eD, box: [x, yb1, zi, x + t, yT0, D], ex: [0, sc * 0.3, sc * 0.5] }));
-    addMort(top, slotV(shift(ivV, zi), x + t / 2, t), t, -1);
+    topM(slotV(shift(ivV, zi), x + t / 2, t));
     addMort(bot, slotV(shift(ivV, zi), x + t / 2 - bx0, t), t, 1);
   });
   ys.forEach(function (y) {
@@ -1188,10 +1265,24 @@ function genCasier(p, out, deco, info) {
     out.push(part('tab', 'Tablette', Wi, Dd, { e: eS, box: [t, y, zi, W - t, y + t, D], ex: [0, 0, sc * 0.7] }));
     sides.forEach(function (sd, i) { addMort(sd, slotU(shift(ivV, zi), y + t / 2, t), t, i ? -1 : 1); });
   });
-  /* portes encastrées dans les cases, charnières invisibles sur les montants */
-  var rowsD = p.portes === 'toutes' ? ny : p.portes === 'bas' ? 1 : 0, nH = 0, nD = 0, nBar = 0, dz = sc * 1.1;
-  var wd = cw - 2 * g, hd = ch - 2 * g;
+  /* portes encastrées dans les cases : pivots en bois (par défaut) ou charnières invisibles sur les montants */
+  var rowsD = p.portes === 'toutes' ? ny : p.portes === 'bas' ? 1 : 0, nH = 0, nD = 0, nBar = 0, dz = sc * 1.1, wood = p.charn !== 'metal';
+  var wd = cw - 2 * g, hd = ch - 2 * g, pv = pivot(t), pivD = [];
   if (rowsD && (hd < 120 || wd < 100)) { info.warn.push('Cases trop petites pour des portes (' + Math.round(wd) + ' × ' + Math.round(hd) + ' mm) : laissées ouvertes.'); rowsD = 0; }
+  /* pivots : portes de rangées superposées ouvertes alternativement à gauche et à droite, pour que les logements d'une
+     tablette (pivot haut de la porte du dessous, pivot bas de la porte du dessus) ne tombent pas au même endroit */
+  if (wood) for (var jw = 0; jw < rowsD; jw++) for (var iw = 0; iw < nx; iw++) {
+    var sw = rowsD > 1 ? ((iw + jw) % 2 ? 'R' : 'L') : iw < nx / 2 ? 'L' : 'R', xcw = t + iw * (cw + t), ycw = yb1 + jw * (ch + t);
+    var wdw = cw - pv.gH - g, ow = { side: sw, x0: sw === 'L' ? xcw + pv.gH : xcw + g, wd: wdw, yB: ycw, yT: ycw + ch, z1: D, ex: [0, 0, dz] };
+    var hdw = ch - pv.gB - pv.gT, cvw = [], ciw = [], hpw = null;
+    if (p.handle === 'decoupe' && hdw < 230) ciw.push({ x: sw === 'L' ? wdw - 40 : 40, y: hdw / 2, d: 28, lay: 'I' });
+    else hpw = handleOn(p.handle, wdw, hdw, cvw, ciw, { side: sw, yc: hdw / 2 });
+    ow.curves = cvw; ow.circ = ciw;
+    var dw = pivotDoor(ow);
+    out.push(dw.door); hwHandle(deco, hpw, ow.x0, dw.y0, dw.zf, { anim: dw.an, ex: ow.ex }); if (hpw && hpw.bar) nBar++;
+    pivD.push([dw, ow, jw + 1 < rowsD]); nD++;
+  }
+  if (wood) rowsD = 0;
   for (var j = 0; j < rowsD; j++) for (var i = 0; i < nx; i++) {
     var side = i < nx / 2 ? 'L' : 'R', xc0 = t + i * (cw + t), yc0 = yb1 + j * (ch + t), x0 = xc0 + g, y0 = yc0 + g;
     var hy = hd > 260 ? doorHinges(hd) : [Math.round(hd * 0.22), Math.round(hd * 0.78)], cx = side === 'L' ? 22.5 : wd - 22.5;
@@ -1220,8 +1311,13 @@ function genCasier(p, out, deco, info) {
       out.push(part('jardC', 'Jardinière (côté)', Dj, hj, { e: { l: N(widen(fJ.od, 0, hj), t), r: N(widen(fJ.od, 0, hj), t), b: T(ivJD, tlj) }, box: [x, H, ij, x + t, H + hj, ij + Dj], ex: [i ? sc * 0.3 : -sc * 0.3, sc * 1.4, 0] }));
       top.rects.push.apply(top.rects, slotV(shift(ivJD, ij), x + t / 2, t));
     });
-    info.hw.push(['Bac de culture ou bâche étanche à glisser dans la jardinière', 1, 'screw']);
+    var bi = [Wj - 2 * t, Dj - 2 * t], vol = Math.round(bi[0] * bi[1] * (hj - 20) / 1e6);
+    info.hw.push(['Bac étanche obligatoire, ' + Math.round(bi[0]) + ' × ' + Math.round(bi[1]) + ' mm au plus (intérieur de la jardinière)', 1, 'screw'], ['Vernis ou huile pour l’intérieur de la jardinière', 1, 'glue']);
+    if (vol > 60) info.warn.push('Jardinière de ' + vol + ' L, soit environ ' + Math.round(vol * 1.6) + ' kg de terre humide : vérifiez que le meuble et le sol le supportent.');
+    if (H > 1000) info.warn.push('Meuble haut avec de la terre sur le dessus : fixez-le au mur.');
   }
+  pivD.forEach(function (q) { if (!pivotHoles(out, q[0], q[1], q[2])) info.warn.push('Pivots de porte : panneau du haut ou du bas introuvable.'); doorStop(out, q[0], q[1], dz); });
+  if (pivD.length) info.hw.push(['Charnières : pivots en bois taillés dans les portes, rien à acheter ; butées collées', pivD.length, 'hinge']);
   if (nH) info.hw.push(['Charnières invisibles Ø 35 pour porte encastrée + embases', nH, 'hinge']);
   if (nBar) info.hw.push(['Poignées barre entraxe 128 mm', nBar, 'handle']);
   info.hw.push(['Colle vinylique (queues droites, tenons, mi-bois)', 1, 'glue']);
@@ -1279,23 +1375,26 @@ function genChaise(p, out, deco, info) {
 /* ---------- bureau debout réglable : deux joues percées de mortaises à trois hauteurs (assis, haut, debout) ; deux longerons
    clavetés portent le plateau, posé sur leurs tenons ; on le change de niveau en déplaçant les longerons ---------- */
 function genStand(p, out, deco, info) {
-  var t = S.t, J = S.jeu, L = p.L, P = p.P, sc = Math.max(L, p.h3) * 0.3 + 80;
+  var t = S.t, J = S.jeu, L = p.L, P = p.P, hr = 90, hst = 110, zr = 100;
   var hs = [p.h1, p.h2, p.h3].map(function (h) { return clamp(h, 600, 1250); }).sort(function (a, b) { return a - b; });
-  var niv = clamp(p.niv || 1, 1, 3) - 1, H = hs[niv], hr = 90, hst = 110, zr = 100, zc = P / 2, Hf = hs[2] - t + 40;
-  for (var k = 1; k < 3; k++) if (hs[k] - hs[k - 1] < hr + 50) info.warn.push('Hauteurs ' + hs[k - 1] + ' et ' + hs[k] + ' mm trop proches : les mortaises se touchent.');
-  var ytr = clamp(p.ytr || 150, 80, hs[0] - t - hr - 200), tenR = [[16, hr - 16]], tenS = [[18, hst - 18]], zR = [zr, P - zr], tlT = topTen(t, true);
+  /* mortaises de deux niveaux voisins séparées d'au moins 50 mm */
+  for (var k = 1; k < 3; k++) if (hs[k] < hs[k - 1] + hr + 50) { var nh = hs[k - 1] + hr + 50; info.warn.push('Hauteur ' + hs[k] + ' mm trop proche de ' + hs[k - 1] + ' mm : portée à ' + nh + ' mm pour séparer les mortaises.'); hs[k] = nh; }
+  var niv = clamp(p.niv || 1, 1, 3) - 1, H = hs[niv], sc = Math.max(L, hs[2]) * 0.3 + 80, zc = P / 2, Hf = hs[2] - t + 40;
+  /* longeron avant reculé sous le plateau : place pour les cuisses en position assise */
+  var zf = clamp(Math.round(P * 0.3), 180, 260), zR = [zr, P - zf];
+  var ytr = clamp(p.ytr || 150, 80, hs[0] - t - hr - 200), tenR = [[16, hr - 16]], tenS = [[18, hst - 18]], tlT = topTen(t, true);
   /* joues : arête 0 = sol (cintre), arête 2 = dessus arrondi ; fenêtres basse et haute */
   var fw = 80, ha = Math.min((P - 2 * fw) * 0.25, ytr - 30);
   var V = [[0, 0], [P, 0], [P, Hf - 40, Math.tan(Math.PI / 8)], [P - 40, Hf], [40, Hf, Math.tan(Math.PI / 8)], [0, Hf - 40]];
-  var lo0 = ytr + hst + 60, lo1 = hs[0] - t - hr - 60, up0 = hs[0] - t - hr + 30, up1 = hs[2] - t - 50, uw = zr + t / 2 + 55;
+  var lo0 = ytr + hst + 60, lo1 = hs[0] - t - hr - 60, up0 = hs[0] - t - hr + 30, up1 = hs[2] - t - 50, uw0 = zr + t / 2 + 55, uw1 = P - zf - t / 2 - 55;
   var curves = [];
   if (lo1 - lo0 >= 120) curves.push(roundRect(90, lo0, P - 90, lo1, 45));
-  if (up1 - up0 >= 150 && P - 2 * uw >= 120) curves.push(roundRect(uw, up0, P - uw, up1, 40));
-  var frames = [0, L - t].map(function (x, i) {
+  if (up1 - up0 >= 150 && uw1 - uw0 >= 120) curves.push(roundRect(uw0, up0, uw1, up1, 40));
+  [0, L - t].forEach(function (x, i) {
     var f = part('joue', 'Joue', P, Hf, { shape: shapeE(V, { 0: ha >= 20 ? [[fw, P - fw, -ha, 'arc']] : [] }), curves: curves, box: [x, 0, 0, x + t, Hf, P], ex: [i ? sc * 0.8 : -sc * 0.8, 0, 0] });
     hs.forEach(function (h) { zR.forEach(function (z) { f.rects.push.apply(f.rects, slotV(shift(tenR, h - t - hr), z, t)); }); });
     f.rects.push.apply(f.rects, slotV(shift(tenS, ytr), zc, t));
-    out.push(f); return f;
+    out.push(f);
   });
   var ls = L - 2 * t, kl = keyLen(t), ivRt = tabIv(ls, 60);
   /* longerons au niveau choisi : clés tournées vers l'intérieur pour rester dans l'emprise des joues */
@@ -1306,26 +1405,32 @@ function genStand(p, out, deco, info) {
   });
   out.push(part('trav', 'Traverse basse', ls, hst, { e: { l: T(tenS, kl), r: T(tenS, kl), b: Mx([[110, ls - 110, -Math.min(hst * 0.3, 35), 'arc']]) }, rects: [keyHole('L', ls, t, hst / 2), keyHole('R', ls, t, hst / 2)], box: [t, ytr, zc - t / 2, L - t, ytr + hst, zc + t / 2], ex: [0, -sc * 0.3, 0] }));
   addKey(out, 'L', 0, ytr + hst / 2, zc, t, 1, sc); addKey(out, 'R', L, ytr + hst / 2, zc, t, 1, sc);
-  /* plateau entre les joues, posé sur les tenons des longerons (mortaises borgnes dessous, non collé) */
-  var Lt = L - 2 * t - 2, zt = 20, top = part('plateau', 'Plateau', Lt, P - 2 * zt, { shape: rrShape(Lt, P - 2 * zt, 12), role: 'plateau', box: [t + 1, H - t, zt, t + 1 + Lt, H, P - zt], ex: [0, sc * 0.9, 0] });
-  var tm = []; zR.forEach(function (z) { tm = tm.concat(slotU(shift(ivRt, -1), z - zt, t)); });
+  /* plateau entre les joues (2,5 mm de jeu de chaque côté), posé sur les tenons des longerons (mortaises borgnes dessous) */
+  var Lt = L - 2 * t - 5, zt = 20, top = part('plateau', 'Plateau', Lt, P - 2 * zt, { shape: rrShape(Lt, P - 2 * zt, 12), role: 'plateau', box: [t + 2.5, H - t, zt, t + 2.5 + Lt, H, P - zt], ex: [0, sc * 0.9, 0] });
+  var tm = []; zR.forEach(function (z) { tm = tm.concat(slotU(shift(ivRt, -2.5), z - zt, t)); });
   topMort(top, tm, true);
   out.push(top);
+  var knee = hs[0] - t - hr;
+  if (knee < 620) info.warn.push('Position assise : dessous du longeron avant à ' + Math.round(knee) + ' mm du sol, les cuisses risquent de le toucher ; montez la hauteur assise.');
   if (P < hs[2] * 0.6) info.warn.push('Joues peu profondes pour la hauteur debout : risque de basculement.');
   if (ls > 1800) info.warn.push('Longerons de ' + Math.round(ls) + ' mm : le plateau risque de fléchir.');
-  info.hw.push(['Clés de serrage taillées dans le panneau (2 par longeron, 2 pour la traverse)', 6, 'tenon'], ['Plateau posé sur les tenons des longerons, non collé : on le soulève pour changer de hauteur', 1, 'glue'], ['Patins sous les joues', 4, 'foot']);
-  info.dims = [Math.round(L) + ' × ' + Math.round(P) + ' mm', 'plateau à ' + hs.join(' / ') + ' mm · réglé à ' + H + ' mm'];
+  var Lx = Math.round(L + 2 * (kl - t));
+  info.hw.push(['Clés de serrage taillées dans le panneau (2 par longeron, 2 pour la traverse)', 6, 'tenon'], ['Plateau posé sur les tenons des longerons, non collé : on le soulève pour changer de hauteur', 1, 'tenon'], ['Patins sous les joues', 4, 'foot']);
+  info.dims = [Math.round(L) + ' × ' + Math.round(P) + ' mm', 'plateau à ' + hs.join(' / ') + ' mm · réglé à ' + H + ' mm · ' + Lx + ' mm hors tout avec les clés'];
 }
 
 /* ---------- cloison mobile : grand panneau croisé à mi-bois avec deux pieds, lisses basses de part et d'autre,
    semelles vissées sous les pieds et roulettes à frein ---------- */
 function genCloison(p, out, deco, info) {
-  var t = S.t, J = S.jeu, W = p.W, H = p.H, D = p.D, sc = Math.max(W, H) * 0.3 + 80, roul = !!p.roul;
-  var hf = 160, ws = 110, xf = [70, W - 70 - t], zc = D / 2, hl = 80, yl = 25, cH = roul ? 75 : 0, ts = t;
+  var t = S.t, W = p.W, H = p.H, D = p.D, sc = Math.max(W, H) * 0.3 + 80, roul = !!p.roul;
+  var hf = 160, ws = 110, xf = [70, W - 70 - t], zc = D / 2, hl = 80, yl = 25, ts = t;
+  /* roulettes Ø 75 au bout des semelles, platine boulonnée (M6 + écrous) */
+  var plA = clamp(p.plA || 60, 30, ws - 30), plB = clamp(p.plB || 45, 30, 90), plD = p.plD || 6.5, cH = roul ? clamp(p.cH || 100, 60, 160) : 0, zw = Math.max(45, plB / 2 + 22);
   var yb = ts, Hp = H - cH - yb;
-  /* panneau : entailles par le bas aux pieds, poignée oblongue en haut */
-  var notP = xf.map(function (x) { return [x, x + t]; });
-  var handle = p.poig ? [roundRect(W / 2 - 75, Hp - 95, W / 2 + 75, Hp - 60, 17.5)] : [];
+  /* panneau : entailles par le bas aux pieds ; poignée à hauteur de main (vers 1 m du sol), pas en haut : on pousse la
+     cloison sans la faire basculer */
+  var notP = xf.map(function (x) { return [x, x + t]; }), vh = clamp(1000 - cH - yb, 300, Hp - 90);
+  var handle = p.poig ? [roundRect(W / 2 - 75, vh - 17.5, W / 2 + 75, vh + 17.5, 17.5)] : [];
   var pan = part('panneau', 'Panneau', W, Hp, { e: { b: N(widen(notP, 0, W), hf / 2) }, curves: handle, box: [0, yb, zc - t / 2, W, yb + Hp, zc + t / 2], role: 'plateau', ex: [0, sc * 0.4, 0] });
   out.push(pan);
   var ivS = tabIv(D - 40, 30), lz = [zc - t / 2 - 40 - t, zc + t / 2 + 40], ivL = [[12, hl - 12]];
@@ -1337,25 +1442,100 @@ function genCloison(p, out, deco, info) {
     /* semelle sous le pied (roulettes ou patins dessous) */
     var sx = x + t / 2 - ws / 2, sm = part('semelle', 'Semelle', ws, D, { box: [sx, 0, 0, sx + ws, ts, D], ex: [i ? sc * 0.5 : -sc * 0.5, -sc * 0.3, 0] });
     addMort(sm, slotV(shift(ivS, 20), ws / 2, t), ts, 1);
-    if (roul) {
-      [70, D - 70].forEach(function (z) { sm.circ.push.apply(sm.circ, plateHoles(ws / 2, z, 60, 45, 6)); });
-    }
+    if (roul) [zw, D - zw].forEach(function (z) { sm.circ.push.apply(sm.circ, plateHoles(ws / 2, z, plA, plB, plD)); });
     out.push(sm);
   });
   /* lisses basses de part et d'autre du panneau, entre les pieds */
   var xa = xf[0] + t, xb = xf[1], ll = xb - xa;
   lz.forEach(function (z, i) { out.push(part('lisse', 'Lisse basse', ll, hl, { e: { l: T(ivL, tenL(t)), r: T(ivL, tenL(t)) }, box: [xa, yb + yl, z, xb, yb + yl + hl, z + t], ex: [0, -sc * 0.2, i ? sc * 0.4 : -sc * 0.4] })); });
   if (roul) {
-    var pts = []; xf.forEach(function (x) { [70, D - 70].forEach(function (z) { pts.push([x + t / 2, z]); }); });
-    patins(deco, info, pts, cH, 60, 45, sc * 0.3);
-    info.hw.push(['Roulettes à platine Ø 50, dont 2 à frein, et vis 5 × 20', 4, 'caster']);
+    var pts = []; xf.forEach(function (x) { [zw, D - zw].forEach(function (z) { pts.push([x + t / 2, z]); }); });
+    patins(deco, info, pts, cH, plA, plB, sc * 0.3);
+    info.hw.push(['Roulettes pivotantes Ø 75 à platine, entraxe ' + plA + ' × ' + plB + ', dont 2 à frein', 4, 'caster'], ['Boulons M6 + écrous (perçage Ø ' + String(plD).replace('.', ',') + ')', 16, 'bolt']);
   } else info.hw.push(['Patins sous les semelles', 4, 'foot']);
-  if (D < H * 0.3) info.warn.push('Pieds courts pour cette hauteur : la cloison risque de basculer ; allongez les pieds.');
+  /* stabilité : empattement réel (entre roulettes) d'au moins 0,35 × la hauteur */
+  var base = roul ? D - 2 * zw : D, need = Math.ceil((0.35 * H + (roul ? 2 * zw : 0)) / 10) * 10;
+  if (base < 0.35 * H) info.warn.push('Empattement de ' + Math.round(base) + ' mm pour ' + Math.round(H) + ' mm de haut : la cloison bascule trop facilement. Allongez les pieds à au moins ' + need + ' mm.');
   info.hw.push(['Colle vinylique (mi-bois, tenons des lisses et des semelles)', 1, 'glue']);
   info.dims = [Math.round(W) + ' × ' + Math.round(H) + ' mm', 'pieds de ' + Math.round(D) + ' mm' + (roul ? ' · sur roulettes' : '')];
 }
 
-var GENS = { compo: genCompo, tiroirs: genTiroirs, placard: genPlacard, etagere: genEtagere, etabli: genEtabli, base: genBase, treteau: genTreteau, caisse: genCaisse, tabouret: genTabouret, mural: genMural, chutes: genChutes, caddie: genCaddie, table: genTable, gueridon: genGueridon, casier: genCasier, chaise: genChaise, stand: genStand, cloison: genCloison };
+/* ---------- îlot de tranquillité (d'après la Wiki Booth d'Opendesk) : cabine assise pour s'isoler dans un espace ouvert.
+   Deux hautes joues biseautées, dossier pleine hauteur, toit plein ou ajouré, assise sur bandeau, rangement dessous et
+   tablette latérale sur console ---------- */
+function genIlot(p, out, deco, info) {
+  var t = S.t, W = p.W, H = p.H, D = p.D, sc = Math.max(W, H) * 0.3 + 80, toit = p.toit !== false, jour = toit && p.jour !== false;
+  var hb = 100, hs = clamp(p.hs || 440, 380, 520), ya = clamp(hs + 230, hs + 150, H - 400), Dt = clamp(Math.round(D * 0.62), 380, D);
+  /* dossier en retrait de eB sur l'arrière des joues (mortaises dans la matière) */
+  var eB = 15, Ds = clamp(eB + t + 480, eB + t + 380, D - 40), ha = 90, tl = tenL(t), tlT = topTen(t, true), Ht = toit ? H - t : H;
+  var zFront = function (y) { return y <= ya ? D : D - (D - Dt) * (y - ya) / (Ht - ya); };
+  /* joues : arête 0 = sol (cintre entre les pieds), 3 = dessus (tenons dans le toit) */
+  var fw = 90, arc = Math.min(hb - 35, 60), ivR = tabIv(Dt, 50);
+  var V = [[0, 0], [D, 0], [D, ya], [Dt, Ht], [0, Ht]], prof = { 0: arc >= 20 ? [[fw, D - fw, -arc, 'arc']] : [] };
+  if (toit) prof[3] = ivR.map(function (a) { return [a[0], a[1], tlT]; });
+  var sides = [0, W - t].map(function (x, i) { var sd = part('joue', 'Joue', D, Ht, { shape: shapeE(V, prof), box: [x, 0, 0, x + t, Ht, D], ex: [i ? sc : -sc, 0, 0] }); out.push(sd); return sd; });
+  var inner = function (i) { return i ? -1 : 1; };
+  /* dossier pleine hauteur, posé sur le plancher, tenons dans les joues, le plancher et le toit */
+  var Hd = Ht - hb - t, Wi = W - 2 * t, ivDy = tabIv(Hd, 60), ivDx = tabIv(Wi, 60);
+  var eDos = { l: T(ivDy, tl), r: T(ivDy, tl), b: T(ivDx, tl) };
+  if (toit) eDos.t = T(ivDx, tlT);
+  var dos = part('dos', 'Dossier', Wi, Hd, { e: eDos, box: [t, hb + t, eB, W - t, Ht, eB + t], ex: [0, 0, -sc * 0.8] });
+  out.push(dos);
+  sides.forEach(function (sd, i) { addMort(sd, slotV(shift(ivDy, hb + t), eB + t / 2, t), t, inner(i)); });
+  /* plancher du rangement sous l'assise */
+  var ivPz = tabIv(Ds, 50), pl = part('plancher', 'Plancher', Wi, Ds, { e: { l: T(ivPz, tl), r: T(ivPz, tl) }, box: [t, hb, 0, W - t, hb + t, Ds], ex: [0, -sc * 0.3, 0] });
+  addMort(pl, slotU(ivDx, eB + t / 2, t), t, 1);
+  out.push(pl);
+  sides.forEach(function (sd, i) { addMort(sd, slotU(ivPz, hb + t / 2, t), t, inner(i)); });
+  /* assise : tenons dans les joues et dans le dossier, posée sur le bandeau avant */
+  var z0 = eB + t, ivSz = tabIv(Ds - z0, 50), ivSx = tabIv(Wi, 70), ivAx = tabIv(Wi, 80), ivAy = [[15, ha - 15]];
+  var seat = part('assise', 'Assise', Wi, Ds - z0, { e: { l: T(ivSz, tl), r: T(ivSz, tl), b: T(ivSx, tl) }, role: 'plateau', box: [t, hs - t, z0, W - t, hs, Ds], ex: [0, sc * 0.2, sc * 0.3] });
+  topMort(seat, slotU(ivAx, Ds - z0 - t / 2, t), true);
+  out.push(seat);
+  sides.forEach(function (sd, i) { addMort(sd, slotU(shift(ivSz, z0), hs - t / 2, t), t, inner(i)); });
+  addMort(dos, slotU(ivSx, hs - t / 2 - hb - t, t), t, 1);
+  out.push(part('bandeau', 'Bandeau d’assise', Wi, ha, { e: { l: T(ivAy, tl), r: T(ivAy, tl), t: T(ivAx, tlT) }, box: [t, hs - t - ha, Ds - t, W - t, hs - t, Ds], ex: [0, sc * 0.1, sc * 0.5] }));
+  sides.forEach(function (sd, i) { addMort(sd, slotV(shift(ivAy, hs - t - ha), Ds - t / 2, t), t, inner(i)); });
+  /* toit : posé sur les joues et le dossier (mortaises borgnes), puits de lumière facultatif */
+  if (toit) {
+    var roof = part('toit', 'Toit', W, Dt, { role: 'plateau', box: [0, Ht, 0, W, H, Dt], ex: [0, sc * 0.9, 0] }), rm = [];
+    [t / 2, W - t / 2].forEach(function (x) { rm = rm.concat(slotV(ivR.map(function (a) { return [Dt - a[1], Dt - a[0]]; }), x, t)); });
+    rm = rm.concat(slotU(shift(ivDx, t), eB + t / 2, t));
+    topMort(roof, rm, true);
+    var dj = Math.round(Math.min(Wi - 160, Dt - z0 - 120, 320));
+    if (jour && dj >= 120) roof.circ.push({ x: W / 2, y: (Dt + z0) / 2, d: dj, lay: 'I' });
+    out.push(roof);
+  }
+  /* tablette latérale sur console, à gauche ou à droite */
+  var tab = p.tab === 'D' || p.tab === 'G' ? p.tab : '', ht = clamp(p.ht || 700, hs + 200, Math.min(ya + 150, Ht - 300));
+  if (tab) {
+    var R = tab === 'D', wT = clamp(Math.round(W * 0.28), 220, 320), dT = 300, zT0 = clamp(Ds - dT + 40, z0 + 40, zFront(ht) - dT - 25);
+    var xT = R ? W - t - wT : t, ivTz = tabIv(dT, 40), eT = {};
+    eT[R ? 'r' : 'l'] = T(ivTz, tl);
+    var tb = part('tablette', 'Tablette', wT, dT, { e: eT, role: 'plateau', box: [xT, ht - t, zT0, xT + wT, ht, zT0 + dT], ex: [R ? sc * 0.4 : -sc * 0.4, sc * 0.2, 0] });
+    var sd = sides[R ? 1 : 0];
+    addMort(sd, slotU(shift(ivTz, zT0), ht - t / 2, t), t, inner(R ? 1 : 0));
+    /* console triangulaire sous la tablette : tenons dans la joue et dans la tablette */
+    var wg = wT - 40, hg = Math.min(wg + 20, 220, ht - t - hs - 20), zG = zT0 + dT / 2 - t / 2, yG = ht - t - hg;
+    var ivGt = [[wg * 0.3, wg - 20]], ivGs = [[25, hg - 15]];
+    var VG = R ? [[wg - 30, 0], [wg, 0], [wg, hg], [0, hg]] : [[0, 0], [30, 0], [wg, hg], [0, hg]];
+    var pG = R ? { 1: ivGs.map(function (a) { return [hg - a[1], hg - a[0], tl]; }), 2: ivGt.map(function (a) { return [wg - a[1], wg - a[0], tlT]; }) }
+      : { 2: ivGt.map(function (a) { return [a[0], a[1], tlT]; }), 3: ivGs.map(function (a) { return [a[0], a[1], tl]; }) };
+    out.push(part('console', 'Console de tablette', wg, hg, { shape: shapeE(VG, pG), box: [R ? W - t - wg : t, yG, zG, R ? W - t : t + wg, ht - t, zG + t], ex: [R ? sc * 0.4 : -sc * 0.4, 0, sc * 0.2] }));
+    /* mortises : dans la tablette (u = distance au chant fixé), dans la joue (y) */
+    var uT = ivGt.map(function (a) { return R ? [wT - (wg - a[0]), wT - (wg - a[1])] : [wg - a[1], wg - a[0]]; });
+    topMort(tb, slotU(uT.map(function (a) { return [Math.min(a[0], a[1]), Math.max(a[0], a[1])]; }), zG + t / 2 - zT0, t), true);
+    out.push(tb);
+    addMort(sd, slotV(ivGs.map(function (a) { return [ht - t - a[1], ht - t - a[0]]; }), zG + t / 2, t), t, inner(R ? 1 : 0));
+  }
+  if (D < H * 0.38) info.warn.push('Îlot peu profond pour sa hauteur (' + Math.round(D) + ' mm pour ' + Math.round(H) + ' mm) : fixez-le au mur ou augmentez la profondeur.');
+  if (Wi > 1220) info.warn.push('Dossier de ' + Math.round(Wi) + ' mm de large : il faut un panneau d’au moins ' + Math.round(Wi + 30) + ' mm de large.');
+  if (Wi < 640) info.warn.push('Îlot étroit : ' + Math.round(Wi) + ' mm entre les joues, prévoyez au moins 640 mm pour s’asseoir à l’aise.');
+  info.hw.push(['Colle vinylique (tenons des joues, du dossier, de l’assise et du toit)', 1, 'glue'], ['Patins sous les joues', 4, 'foot']);
+  info.dims = [Math.round(W) + ' × ' + Math.round(H) + ' × ' + Math.round(D) + ' mm', 'assise à ' + hs + ' mm' + (tab ? ' · tablette à ' + ht + ' mm' : '') + (toit ? ' · toit' + (jour ? ' ajouré' : '') : ' · sans toit')];
+}
+
+var GENS = { compo: genCompo, tiroirs: genTiroirs, placard: genPlacard, etagere: genEtagere, etabli: genEtabli, base: genBase, treteau: genTreteau, caisse: genCaisse, tabouret: genTabouret, mural: genMural, chutes: genChutes, caddie: genCaddie, table: genTable, gueridon: genGueridon, casier: genCasier, chaise: genChaise, stand: genStand, cloison: genCloison, ilot: genIlot };
 
 /* ---------- géométrie 2D ---------- */
 function clean(pts) {

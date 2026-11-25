@@ -4,6 +4,11 @@ Les entrées décrivent les changements du point de vue de l'utilisateur. Chaque
 
 ## Non publié
 
+- Charnières en bois sans quincaillerie, dans l’esprit des casiers Opendesk : portes encastrées sur pivots taillés dans leur contour, qui tournent dans des logements ronds ; la porte se dégonde en la soulevant, une butée collée l’arrête fermée. Par défaut sur l’étagère à casiers et le placard (option « Invisibles Ø 35 » conservée).
+- Nouveau modèle : îlot de tranquillité, d’après la Wiki Booth d’Opendesk (cabine assise, dossier pleine hauteur, toit plein ou ajouré, tablette latérale sur console, rangement sous l’assise). Versions « Cabine téléphonique » et « Îlot ouvert ».
+- Catalogue : sections « Tables et bureaux » et « Assises » réunies en « Tables, chaises et tabourets » ; 40 fiches en 3 familles.
+- Relecture de fabrication : cloison mobile plus stable (roulettes Ø 75 au bout des semelles, boulonnées, poignée vers 1 m, alerte d’empattement, pieds par défaut de 720 mm) ; bureau debout (notice de réglage corrigée, niveaux séparés d’au moins 50 mm, longeron avant reculé, largeur limitée à 2,3 m) ; table à 3 piètements (tenons superposés à sec au piètement central, plateau en deux parties démontable, clés en panneau fin existant) ; jardinière (mortaises borgnes sous la terre, bac étanche obligatoire, alertes de poids) ; table et tabouret d’enfant accordés (530 et 310 mm) ; « Plan de travail 4 places » renommé « Bureau 4 places ».
+- Les étapes de montage peuvent dépendre des infos du moteur (`STEPS[mod](p, info)`).
 - Correctif : après une mise en ligne, un navigateur pouvait garder l’ancien script en cache avec la nouvelle page et n’afficher aucun meuble. Styles et scripts sont désormais suffixés par la date de publication, et un message invite à recharger la page si l’application ne démarre pas.
 - Dépôt GitHub : application en fichiers séparés (`index.html`, `css/`, `js/`), servie telle quelle par GitHub Pages ; tests Node (`npm test`, `npm run fuzz`), version en un seul fichier (`npm run bundle`).
 - Travail en équipe : `AGENTS.md`, `CLAUDE.md`, réglages, hook, commandes et sous-agent Claude Code partagés, CI GitHub Actions, modèle de PR, guide de contribution.

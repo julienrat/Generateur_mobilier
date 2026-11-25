@@ -21,6 +21,8 @@ const cases = [
   ['tiroirs', { ...base, W: 450, H: 680, D: 500, n: 4, dist: 'prog', slides: 'bois', base: 'none', top: 'bandes', wS: 90, handle: 'percage' }],
   ['placard', { ...base, W: 800, H: 720, D: 580, nd: 2, sens: 'L', nf: 1, na: 1, base: 'plinth' }],
   ['placard', { ...base, W: 500, H: 1800, D: 400, nd: 1, sens: 'R', nf: 2, na: 3, base: 'none', handle: 'percage' }],
+  ['placard', { ...base, W: 900, H: 1200, D: 500, nd: 2, sens: 'L', nf: 1, na: 2, base: 'none', top: 'bandes', charn: 'metal' }],
+  ['placard', { ...base, W: 600, H: 900, D: 450, nd: 1, sens: 'L', nf: 0, na: 1, base: 'plinth', top: 'bandes', charn: 'bois' }],
   ['etagere', { ...base, W: 800, H: 1600, D: 320, nf: 4, base: 'plinth', windows: true }],
   ['etabli', { L: 1500, P: 750, H: 900, double: true, dogs: true, pitch: 96, dogD: 20, legs: true, shelf: true, ov: 60, hr: 120 }],
   ['base', { plate: true, W: 900, D: 900, nx: 2, nz: 2, hr: 80, cH: 100, plA: 60, plB: 45, plD: 6.5 }],
@@ -47,15 +49,24 @@ const cases = [
   ['casier', { W: 1000, H: 1050, D: 380, nx: 3, ny: 3, hp: 60, back: true, portes: 'aucune', handle: 'decoupe', gapF: 3 }],
   ['casier', { W: 1000, H: 1050, D: 380, nx: 3, ny: 3, hp: 60, back: true, portes: 'toutes', handle: 'decoupe', gapF: 3 }],
   ['casier', { W: 1300, H: 750, D: 400, nx: 4, ny: 2, hp: 0, back: false, portes: 'bas', handle: 'percage', gapF: 3 }],
+  ['casier', { W: 1000, H: 1050, D: 380, nx: 3, ny: 3, hp: 60, back: true, portes: 'toutes', handle: 'decoupe', gapF: 3, charn: 'metal' }],
+  ['casier', { W: 800, H: 1900, D: 320, nx: 2, ny: 5, hp: 0, back: false, portes: 'toutes', handle: 'aucune', gapF: 2 }],
   ['chaise', { Hs: 450, W: 440, D: 480, Hb: 820, inc: 10, nl: 3, trav: true, yst: 150 }],
   ['chaise', { Hs: 650, W: 420, D: 500, Hb: 980, inc: 8, nl: 2, trav: true, yst: 300 }],
   ['table', { L: 4400, P: 1180, H: 738, forme: 'stade', R: 40, pied: 'A', wt: 700, ov: 450, trav: 'cle', ytr: 160, rail: true, fix: 'borgne', cable: true, nP: 3 }],
   ['table', { L: 2400, P: 950, H: 738, forme: 'rect', R: 40, pied: 'plaque', wt: 520, ov: 300, trav: 'vis', ytr: 150, rail: true, fix: 'traversant', cable: true, nP: 3 }],
   ['table', { L: 2900, P: 400, H: 450, forme: 'stade', R: 40, pied: 'A', wt: 1000, ov: 240, trav: 'aucune', ytr: 120, rail: true, fix: 'borgne', cable: false, nP: 3 }],
+  ['table', { L: 3600, P: 900, H: 740, forme: 'rect', R: 40, pied: 'plaque', wt: 600, ov: 300, trav: 'cle', ytr: 150, rail: true, fix: 'traversant', cable: true, nP: 3 }],
   ['stand', { L: 1200, P: 800, h1: 740, h2: 910, h3: 1090, niv: 1, ytr: 150 }],
   ['stand', { L: 1600, P: 800, h1: 720, h2: 900, h3: 1100, niv: 3, ytr: 150 }],
+  ['stand', { L: 2300, P: 600, h1: 760, h2: 880, h3: 1040, niv: 2, ytr: 300 }],
   ['cloison', { W: 1000, H: 1800, D: 600, roul: true, poig: true }],
-  ['cloison', { W: 1400, H: 1500, D: 500, roul: false, poig: false }],
+  ['cloison', { W: 1200, H: 1500, D: 550, roul: false, poig: false }],
+  ['cloison', { W: 600, H: 2100, D: 900, roul: true, poig: true, cH: 120, plA: 50, plB: 60, plD: 8 }],
+  ['ilot', { W: 1000, H: 1850, D: 760, hs: 440, toit: true, jour: true, tab: 'G', ht: 700 }],
+  ['ilot', { W: 900, H: 1900, D: 760, hs: 460, toit: true, jour: false, tab: 'D', ht: 720 }],
+  ['ilot', { W: 1240, H: 1500, D: 600, hs: 520, toit: false, tab: 'aucune', ht: 700 }],
+  ['ilot', { W: 800, H: 2100, D: 900, hs: 380, toit: true, jour: true, tab: 'D', ht: 860 }],
   ['casier', { W: 1000, H: 800, D: 400, nx: 3, ny: 2, hp: 60, back: true, portes: 'aucune', handle: 'decoupe', gapF: 3, jard: true, hj: 200 }],
 ];
 const dens = raw => C.arcPts(raw.map(q => ({ x: q[0], y: q[1], b: q[2] || 0 })));
@@ -91,7 +102,7 @@ for (const [mod, p] of cases) {
     const cs = []; for (let m = 0; m < 8; m++) cs.push(toW(pt.tf, rxF(pt, [m & 1 ? hi[0] : lo[0], m & 2 ? hi[1] : lo[1], m & 4 ? hi[2] : lo[2]])));
     const wlo = [0, 1, 2].map(k => Math.min(...cs.map(q => q[k]))), whi = [0, 1, 2].map(k => Math.max(...cs.map(q => q[k])));
     return { pt, ax, raw, holes, lo: wlo, hi: whi, org: [b[0], b[1], b[2]] }; });
-  const inside = (s, Pw, e) => { const P = rxI(s.pt, toL(s.pt.tf, Pw)); const th = P[s.ax.th] - s.org[s.ax.th]; if (th < e || th > s.pt.th - e) return false; const u = P[s.ax.u] - s.org[s.ax.u], v = P[s.ax.v] - s.org[s.ax.v]; if (!pip([u, v], s.raw)) return false; if (s.holes.some(hp => pip([u, v], hp))) return false; if ((s.pt.pockets || []).some(q => u > q.x && u < q.x + q.w && v > q.y && v < q.y + q.h && (q.side > 0 ? th > s.pt.th - q.depth : th < q.depth))) return false; return !s.pt.rects.some(rc => u > rc.x && u < rc.x + rc.w && v > rc.y && v < rc.y + rc.h); };
+  const inside = (s, Pw, e) => { const P = rxI(s.pt, toL(s.pt.tf, Pw)); const th = P[s.ax.th] - s.org[s.ax.th]; if (th < e || th > s.pt.th - e) return false; const u = P[s.ax.u] - s.org[s.ax.u], v = P[s.ax.v] - s.org[s.ax.v]; if (!pip([u, v], s.raw)) return false; if (s.holes.some(hp => pip([u, v], hp))) return false; if ((s.pt.pockets || []).some(q => u > q.x && u < q.x + q.w && v > q.y && v < q.y + q.h && (q.side > 0 ? th > s.pt.th - q.depth : th < q.depth))) return false; if ((s.pt.circ || []).some(c => (u - c.x) ** 2 + (v - c.y) ** 2 < (c.d / 2) ** 2 && (c.lay !== 'P' || (c.side > 0 ? th > s.pt.th - c.depth : c.side < 0 && th < c.depth)))) return false; return !s.pt.rects.some(rc => u > rc.x && u < rc.x + rc.w && v > rc.y && v < rc.y + rc.h); };
   for (let i = 0; i < solids.length; i++) for (let j = i + 1; j < solids.length; j++) {
     const A = solids[i], B = solids[j]; const lo = [0, 1, 2].map(k => Math.max(A.lo[k], B.lo[k])), hi = [0, 1, 2].map(k => Math.min(A.hi[k], B.hi[k]));
     if (hi.some((h, k) => h - lo[k] < 0.1)) continue;

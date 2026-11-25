@@ -283,6 +283,7 @@ function renderCtl() {
   $('#fMod').innerHTML = accHTML('p');
   $('#fUs').innerHTML = accHTML('m');
   renderMods(); vis(); navSel();
+  $('#hint3d').textContent = 'Glisser pour tourner · molette ou pincement pour zoomer' + (st.mod === 'compo' ? ' · cliquer un caisson pour le modifier' : '');
 }
 function vis() {
   document.querySelectorAll('.f[data-k]').forEach(el => {
@@ -763,9 +764,9 @@ function init3d() {
     r.setPixelRatio(Math.min(2, window.devicePixelRatio || 1)); r.shadowMap.enabled = true; r.shadowMap.type = THREE.PCFSoftShadowMap; r.outputEncoding = THREE.sRGBEncoding;
     host.appendChild(r.domElement);
     const sc = new THREE.Scene(), cam = new THREE.PerspectiveCamera(30, 1, 5, 60000);
-    sc.add(new THREE.HemisphereLight(0xfff6e8, 0x30408f, 0.8));
-    const sun = new THREE.DirectionalLight(0xffffff, 0.85); sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048); sun.shadow.bias = -0.0004; sc.add(sun); sc.add(sun.target);
-    const fill = new THREE.DirectionalLight(0xdfe6ff, 0.35); sc.add(fill);
+    sc.add(new THREE.HemisphereLight(0xfff6e8, 0x5a5878, 0.5));
+    const sun = new THREE.DirectionalLight(0xffffff, 0.75); sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048); sun.shadow.bias = -0.0004; sc.add(sun); sc.add(sun.target);
+    const fill = new THREE.DirectionalLight(0xdfe6ff, 0.3); sc.add(fill);
     const ground = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.ShadowMaterial({ opacity: 0.3 })); ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; sc.add(ground);
     const root = new THREE.Group(); sc.add(root);
     V = { r, sc, cam, sun, fill, ground, root, ray: new THREE.Raycaster(), hi: new Map(), down: null, items: [], expl: 0, th: 0.62, ph: 1.1, zoom: 1, C: [0, 0, 0], fitD: 2000, R: 800, open: 0, dirty: true, mats: {}, tex: woodTex(),
@@ -877,7 +878,7 @@ function build3d(refit) {
   const C = [(mn[0] + mx[0]) / 2, (mn[1] + mx[1]) / 2, (mn[2] + mx[2]) / 2];
   V.C = C; V.R = Math.hypot(mx[0] - mn[0], mx[1] - mn[1], mx[2] - mn[2]) / 2;
   V.ground.position.set(C[0], mn[1] - 0.5, C[2]); V.ground.scale.set(V.R * 14, V.R * 14, 1);
-  const s = V.sun, R2 = V.R; s.position.set(C[0] + R2 * 1.1, C[1] + R2 * 2.6, C[2] + R2 * 1.7); s.target.position.set(C[0], C[1], C[2]);
+  const s = V.sun, R2 = V.R; s.position.set(C[0] + R2 * 1.6, C[1] + R2 * 2.15, C[2] + R2 * 1.93); s.target.position.set(C[0], C[1], C[2]);
   const sc = s.shadow.camera; sc.left = sc.bottom = -R2 * 2.2; sc.right = sc.top = R2 * 2.2; sc.near = R2 * 0.2; sc.far = R2 * 9; sc.updateProjectionMatrix();
   V.fill.position.set(C[0] - R2 * 2, C[1] + R2, C[2] - R2);
   if (refit) { V.zoom = 1; V.th = 0.62; V.ph = 1.1; }
@@ -893,7 +894,7 @@ function pick(e) {
   const tag = hit ? hit.object.userData.mod : null;
   st.sel = tag && R.info.modMap && R.info.modMap[tag] ? (st.sel === tag ? null : tag) : null;
   applySel(); renderSel();
-  if (tag && !st.sel && (tag === 'Base' || tag === 'Plateau')) toast(tag === 'Base' ? 'Base roulante : réglages dans « Base roulante » à gauche.' : 'Plateau : réglages dans « Plateau » à gauche.');
+  if (tag && !st.sel && (tag === 'Base' || tag === 'Plateau')) toast(tag === 'Base' ? 'Base roulante : réglages dans la section « Base roulante ».' : 'Plateau : réglages dans la section « Plateau ».');
 }
 $('#bOpen').addEventListener('click', e => { st.open = !st.open; e.currentTarget.setAttribute('aria-pressed', String(st.open)); e.currentTarget.textContent = st.open ? 'Fermer' : 'Ouvrir'; });
 $('#rExp').addEventListener('input', e => { if (!V) return; V.expl = +e.target.value; fit(); V.dirty = true; });
@@ -1173,9 +1174,9 @@ function galR() {
   try {
     const r = new THREE.WebGLRenderer({ antialias: true, alpha: true }); r.setPixelRatio(1); r.outputEncoding = THREE.sRGBEncoding; r.shadowMap.enabled = true; r.shadowMap.type = THREE.PCFSoftShadowMap;
     const sc = new THREE.Scene(), cam = new THREE.PerspectiveCamera(26, 4 / 3, 5, 60000);
-    sc.add(new THREE.HemisphereLight(0xfff6e8, 0x8890b0, 0.85));
-    const sun = new THREE.DirectionalLight(0xffffff, 0.8); sun.castShadow = true; sun.shadow.mapSize.set(1024, 1024); sun.shadow.bias = -0.0004; sc.add(sun); sc.add(sun.target);
-    const fill = new THREE.DirectionalLight(0xdfe6ff, 0.35); sc.add(fill);
+    sc.add(new THREE.HemisphereLight(0xfff6e8, 0x5a5878, 0.5));
+    const sun = new THREE.DirectionalLight(0xffffff, 0.75); sun.castShadow = true; sun.shadow.mapSize.set(1024, 1024); sun.shadow.bias = -0.0004; sc.add(sun); sc.add(sun.target);
+    const fill = new THREE.DirectionalLight(0xdfe6ff, 0.3); sc.add(fill);
     const ground = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.ShadowMaterial({ opacity: 0.16 })); ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; sc.add(ground);
     GAL = { r, sc, cam, sun, fill, ground, cur: null, w: 0, h: 0 };
   } catch (err) { console.warn(err); GAL = false; }
@@ -1207,7 +1208,7 @@ function galDraw(k, th, cv) {
   const f = (cam.fov * Math.PI) / 360, hf = Math.atan(Math.tan(f) * cam.aspect), d = Math.max(Rr / Math.sin(f), Rr / Math.sin(hf)) * 1.02, ph = 1.12;
   cam.near = d / 100; cam.far = d * 30; cam.updateProjectionMatrix();
   cam.position.set(C[0] + d * Math.sin(ph) * Math.sin(th), C[1] + d * Math.cos(ph), C[2] + d * Math.sin(ph) * Math.cos(th)); cam.lookAt(C[0], C[1], C[2]);
-  G.sun.position.set(C[0] + Rr * 1.1, C[1] + Rr * 2.6, C[2] + Rr * 1.7); G.sun.target.position.set(C[0], C[1], C[2]);
+  G.sun.position.set(C[0] + Rr * 1.6, C[1] + Rr * 2.15, C[2] + Rr * 1.93); G.sun.target.position.set(C[0], C[1], C[2]);
   const sc = G.sun.shadow.camera; sc.left = sc.bottom = -Rr * 2.2; sc.right = sc.top = Rr * 2.2; sc.near = Rr * 0.2; sc.far = Rr * 9; sc.updateProjectionMatrix();
   G.fill.position.set(C[0] - Rr * 2, C[1] + Rr, C[2] - Rr); G.ground.position.set(C[0], y0 - 0.5, C[2]); G.ground.scale.set(Rr * 14, Rr * 14, 1);
   if (G.cur !== grp) { if (G.cur) G.sc.remove(G.cur); G.sc.add(grp); G.cur = grp; }
@@ -1251,7 +1252,7 @@ function openCat(e) {
   const bo = $('#bOpen'); bo.setAttribute('aria-pressed', 'false'); bo.textContent = 'Ouvrir';
   showPage('conf'); renderCtl(); if (e.i >= 0) $('#preset').value = e.i; regen(true);
   if (st.view !== '3d') $('#views button[data-v="3d"]').click();
-  toast(`${e.n} : réglez-le à gauche, la 3D et le débit suivent.`);
+  toast(`${e.n} : changez ses réglages, la 3D et le débit suivent.`);
 }
 $('#home').addEventListener('click', e => {
   const c = e.target.closest('.hc'); if (c) { openCat(CAT[+c.dataset.c]); return; }

@@ -8,7 +8,7 @@ Application web d'une seule page qui génère des meubles paramétriques en cont
 
 | Fichier | Rôle | Style |
 |---|---|---|
-| `index.html` | Structure de la page, charge Three.js r128 (cdnjs), puis `js/core.js` et `js/ui.js` | HTML |
+| `index.html` | Structure de la page, charge Three.js r128 (cdnjs), puis `css/app.css`, `js/core.js` et `js/ui.js` suffixés par `?v=` + date de publication (`document.lastModified`) pour éviter les mélanges de versions en cache ; affiche « rechargez la page » si `ui.js` n'a pas posé `window.APP_OK` | HTML |
 | `css/app.css` | Styles, thème clair et sombre (`light-dark()`, variables CSS) | CSS |
 | `js/core.js` | Moteur : pièces, assemblages, dégagements d'angle, imbrication, DXF, ZIP. Aucun accès au DOM. Exporté pour Node en fin de fichier | **ES5** : `var`, `function`, pas de flèches ni de `const` (le fichier est aussi exécuté tel quel par les tests Node) |
 | `js/ui.js` | Interface, état, 3D, catalogue, Mes chutes, exports. Tout le fichier est dans un bloc `{ … }` | ES2020 : `const`, flèches, gabarits |

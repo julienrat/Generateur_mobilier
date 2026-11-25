@@ -1296,4 +1296,5 @@ renderCtl();
 init3d();
 regen(true);
 showPage('home');
+window.APP_OK = true; /* lu par index.html : sans lui, la page affiche « rechargez la page » */
 }

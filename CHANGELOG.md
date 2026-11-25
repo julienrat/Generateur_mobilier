@@ -4,6 +4,7 @@ Les entrées décrivent les changements du point de vue de l'utilisateur. Chaque
 
 ## Non publié
 
+- Correctif : après une mise en ligne, un navigateur pouvait garder l’ancien script en cache avec la nouvelle page et n’afficher aucun meuble. Styles et scripts sont désormais suffixés par la date de publication, et un message invite à recharger la page si l’application ne démarre pas.
 - Dépôt GitHub : application en fichiers séparés (`index.html`, `css/`, `js/`), servie telle quelle par GitHub Pages ; tests Node (`npm test`, `npm run fuzz`), version en un seul fichier (`npm run bundle`).
 - Travail en équipe : `AGENTS.md`, `CLAUDE.md`, réglages, hook, commandes et sous-agent Claude Code partagés, CI GitHub Actions, modèle de PR, guide de contribution.
 - Correctif : le pack DXF ne se téléchargeait pas pour les tables, les étagères à casiers et les chaises.

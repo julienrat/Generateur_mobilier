@@ -8,6 +8,8 @@ Les entrées décrivent les changements du point de vue de l'utilisateur. Chaque
 - Travail en équipe : `AGENTS.md`, `CLAUDE.md`, réglages, hook, commandes et sous-agent Claude Code partagés, CI GitHub Actions, modèle de PR, guide de contribution.
 - Correctif : le pack DXF ne se téléchargeait pas pour les tables, les étagères à casiers et les chaises.
 - Les tests renvoient un code d'erreur en cas d'échec (pour la CI).
+- 3D et vignettes : éclairage adouci, les dessus (plateaux, assises) ne sortent plus blancs.
+- Textes d'aide valables quelle que soit la mise en page (réglages à gauche sur grand écran, sous la 3D sur petit écran) ; l'aide « cliquer un caisson » ne s'affiche que pour l'établi modulaire.
 
 ## v11 (24/11/2026)
 
